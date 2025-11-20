@@ -1,0 +1,68 @@
+{
+  "name": "css-variables-vscode",
+  "displayName": "CSS Variable Extension",
+  "description": "Intelligent CSS variable support with cross-file completion, hover info, and context-aware cascade resolution",
+  "version": "0.1.0",
+  "publisher": "lmn451",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lmn451/css-variables-vscode"
+  },
+  "keywords": [
+    "css",
+    "variables",
+    "custom properties",
+    "autocomplete",
+    "intellisense",
+    "lsp"
+  ],
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:css",
+    "onLanguage:scss",
+    "onLanguage:sass",
+    "onLanguage:less",
+    "onLanguage:html",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescriptreact"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "CSS Variable Language Server",
+      "properties": {
+        "cssVariableLsp.maxNumberOfProblems": {
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "css-variable-lsp": "^1.0.0",
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.6",
+    "@types/vscode": "^1.106.0",
+    "@vscode/vsce": "3.7.0",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.21.0+sha512.da3337267e400fdd3d479a6c68079ac6db01d8ca4f67572083e722775a796788a7a9956613749e000fac20d424b594f7a791a5f4e2e13581c5ef947f26968a40"
+}
