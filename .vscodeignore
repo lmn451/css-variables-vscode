@@ -3,5 +3,7 @@ tsconfig.json
 .vscode/**
 .gitignore
 *.vsix
-
+node_modules
+out
+esbuild.js
 .eslintrc.json
