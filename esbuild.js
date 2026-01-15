@@ -22,26 +22,26 @@ const esbuildProblemMatcherPlugin = {
 	},
 };
 
-async function main() {
-	const ctx = await esbuild.context({
-		entryPoints: {
-			extension: 'src/extension.ts',
-			server: 'node_modules/css-variable-lsp/server/out/server/src/server.js'
-		},
-		bundle: true,
-		format: 'cjs',
-		minify: production,
-		sourcemap: !production,
-		sourcesContent: false,
-		platform: 'node',
-		outdir: 'dist',
-		external: ['vscode'],
-		logLevel: 'silent',
-		plugins: [
-			/* add to the end of plugins array */
-			esbuildProblemMatcherPlugin,
-		],
-	});
+	async function main() {
+		const ctx = await esbuild.context({
+			entryPoints: {
+				extension: 'src/extension.ts',
+				server: 'node_modules/css-variable-lsp/out/server.js'
+			},
+			bundle: true,
+			format: 'cjs',
+			minify: production,
+			sourcemap: !production,
+			sourcesContent: false,
+			platform: 'node',
+			outdir: 'dist',
+			external: ['vscode'],
+			logLevel: 'silent',
+			plugins: [
+				/* add to the end of plugins array */
+				esbuildProblemMatcherPlugin,
+			],
+		});
 
 	if (watch) {
 		await ctx.watch();

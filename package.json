@@ -2,7 +2,7 @@
   "name": "css-variables-vscode",
   "displayName": "CSS Variable Extension",
   "description": "Intelligent CSS variable support with cross-file completion, hover info, and context-aware cascade resolution",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "publisher": "miclmn451",
   "icon": "icon.png",
   "repository": {
@@ -44,6 +44,45 @@
           "type": "number",
           "default": 100,
           "description": "Controls the maximum number of problems produced by the server."
+        },
+        "cssVariableLsp.lookupFiles": {
+          "type": "array",
+          "default": [
+            "**/*.less",
+            "**/*.scss",
+            "**/*.sass",
+            "**/*.css",
+            "**/*.html",
+            "**/*.vue",
+            "**/*.svelte",
+            "**/*.astro",
+            "**/*.ripple"
+          ],
+          "description": "Glob patterns for files to scan for CSS variables.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cssVariableLsp.blacklistFolders": {
+          "type": "array",
+          "default": [
+            "**/.cache/**",
+            "**/.DS_Store",
+            "**/.git/**",
+            "**/.hg/**",
+            "**/.next/**",
+            "**/.svn/**",
+            "**/bower_components/**",
+            "**/CVS/**",
+            "**/dist/**",
+            "**/node_modules/**",
+            "**/tests/**",
+            "**/tmp/**"
+          ],
+          "description": "Glob patterns for folders to exclude from CSS variable indexing.",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }
@@ -57,14 +96,14 @@
     "package": "vsce package"
   },
   "dependencies": {
-    "css-variable-lsp": "^1.0.0",
+    "css-variable-lsp": "^1.0.13",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^18.14.6",
-    "@types/vscode": "^1.80.0",
+    "@types/node": "^18.19.130",
+    "@types/vscode": "^1.108.1",
     "@vscode/vsce": "3.7.0",
-    "esbuild": "^0.27.0",
+    "esbuild": "^0.27.2",
     "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.21.0+sha512.da3337267e400fdd3d479a6c68079ac6db01d8ca4f67572083e722775a796788a7a9956613749e000fac20d424b594f7a791a5f4e2e13581c5ef947f26968a40"

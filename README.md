@@ -13,6 +13,8 @@ Intelligent CSS variable support with cross-file completion, hover information, 
   - Preprocessors (`.scss`, `.sass`, `.less`)
   - HTML (`.html`)
   - JavaScript/TypeScript (`.js`, `.ts`, `.jsx`, `.tsx`)
+  - Component Frameworks (`.vue`, `.svelte`, `.astro`, PostCSS)
+- **🎨 Color Decorations**: Color previews for CSS variables used in `var(--...)` expressions
 - **⚡ Real-Time Updates**: Automatically detects changes across all supported files in your workspace
 
 ## Installation
@@ -83,16 +85,70 @@ Hovering over `var(--color)` in `div.special` context shows:
 3. red from :root (0,1,0) (lower specificity)
 ```
 
+## Configuration
+
+You can customize the extension behavior through VSCode settings. Open Settings (Cmd+, or Ctrl+,) and search for "cssVariableLsp".
+
+### Available Settings
+
+- `cssVariableLsp.maxNumberOfProblems` (default: `100`)
+  - Controls the maximum number of problems produced by the server.
+
+- `cssVariableLsp.lookupFiles` (default: `["**/*.less", "**/*.scss", "**/*.sass", "**/*.css", "**/*.html", "**/*.vue", "**/*.svelte", "**/*.astro", "**/*.ripple"]`)
+  - Glob patterns for files to scan for CSS variables.
+  - You can add or remove patterns to control which files are indexed.
+
+- `cssVariableLsp.blacklistFolders` (default: `["**/.cache/**", "**/.DS_Store", "**/.git/**", "**/.hg/**", "**/.next/**", "**/.svn/**", "**/bower_components/**", "**/CVS/**", "**/dist/**", "**/node_modules/**", "**/tests/**", "**/tmp/**"]`)
+  - Glob patterns for folders to exclude from CSS variable indexing.
+  - Add patterns for folders you want to exclude from variable indexing.
+
+### Example Configuration
+
+To scan only CSS and Vue files and exclude a custom folder:
+
+```json
+{
+  "cssVariableLsp.lookupFiles": [
+    "**/*.css",
+    "**/*.vue"
+  ],
+  "cssVariableLsp.blacklistFolders": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/my-custom-folder/**"
+  ]
+}
+```
+
+### Workspace-Specific Settings
+
+You can also configure these settings at the workspace level by creating or editing `.vscode/settings.json` in your project:
+
+```json
+{
+  "cssVariableLsp.lookupFiles": [
+    "**/*.css",
+    "**/*.scss",
+    "**/*.vue"
+  ],
+  "cssVariableLsp.blacklistFolders": [
+    "**/node_modules/**",
+    "**/dist/**"
+  ]
+}
+```
+
 ## Features in Detail
 
 ### Cross-File Variable Tracking
 
 The language server indexes all CSS variables across your workspace, including:
 
-- Standard CSS files
-- Preprocessor files
-- HTML `<style>` blocks
-- JavaScript/TypeScript strings
+- Standard CSS files (`.css`)
+- Preprocessor files (`.scss`, `.sass`, `.less`)
+- HTML files (`.html`)
+- Component frameworks (`.vue`, `.svelte`, `.astro`)
+- JavaScript/TypeScript files (`.js`, `.ts`, `.jsx`, `.tsx`)
 
 ### CSS Cascade Intelligence
 
