@@ -2,7 +2,7 @@
   "name": "css-variables-vscode",
   "displayName": "CSS Variable Extension",
   "description": "Intelligent CSS variable support with cross-file completion, hover info, and context-aware cascade resolution",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "miclmn451",
   "icon": "icon.png",
   "repository": {

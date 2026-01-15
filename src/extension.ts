@@ -4,8 +4,7 @@ import {
 	LanguageClient,
 	LanguageClientOptions,
 	ServerOptions,
-	TransportKind,
-	State
+	TransportKind
 } from 'vscode-languageclient/node';
 
 let client: LanguageClient;
@@ -112,8 +111,15 @@ export function deactivate(): Thenable<void> | undefined {
 	if (!client) {
 		return undefined;
 	}
-	if (client.state === State.Starting) {
+
+	const clientState = client['state'];
+	if (!clientState || (clientState as any) === 'starting') {
 		return undefined;
 	}
-	return client.stop();
+
+	try {
+		return client.stop();
+	} catch (e) {
+		return undefined;
+	}
 }

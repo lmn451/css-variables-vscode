@@ -14869,12 +14869,12 @@ var require_client = __commonJS({
       CloseAction2[CloseAction2["DoNotRestart"] = 1] = "DoNotRestart";
       CloseAction2[CloseAction2["Restart"] = 2] = "Restart";
     })(CloseAction || (exports2.CloseAction = CloseAction = {}));
-    var State2;
-    (function(State3) {
-      State3[State3["Stopped"] = 1] = "Stopped";
-      State3[State3["Starting"] = 3] = "Starting";
-      State3[State3["Running"] = 2] = "Running";
-    })(State2 || (exports2.State = State2 = {}));
+    var State;
+    (function(State2) {
+      State2[State2["Stopped"] = 1] = "Stopped";
+      State2[State2["Starting"] = 3] = "Starting";
+      State2[State2["Running"] = 2] = "Running";
+    })(State || (exports2.State = State = {}));
     var SuspendMode;
     (function(SuspendMode2) {
       SuspendMode2["off"] = "off";
@@ -15077,11 +15077,11 @@ var require_client = __commonJS({
       getPublicState() {
         switch (this.$state) {
           case ClientState.Starting:
-            return State2.Starting;
+            return State.Starting;
           case ClientState.Running:
-            return State2.Running;
+            return State.Running;
           default:
-            return State2.Stopped;
+            return State.Stopped;
         }
       }
       get initializeResult() {
@@ -18101,10 +18101,15 @@ function deactivate() {
   if (!client) {
     return void 0;
   }
-  if (client.state === import_node.State.Starting) {
+  const clientState = client["state"];
+  if (!clientState || clientState === "starting") {
     return void 0;
   }
-  return client.stop();
+  try {
+    return client.stop();
+  } catch (e) {
+    return void 0;
+  }
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
