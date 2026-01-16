@@ -1,111 +1,152 @@
-# CSS Variable - VSCode Extension
+# CSS Variables (LSP) for VS Code
 
-Intelligent CSS variable support with cross-file completion, hover information, and context-aware CSS cascade resolution.
+Project-wide CSS custom properties (variables) support for VS Code, powered by `css-variable-lsp`.
 
 ## Features
 
-- **✨ Cross-File Completion**: Get autocomplete suggestions for CSS variables defined anywhere in your workspace
-- **🔍 Hover Information**: See variable values and their definitions on hover, with full CSS cascade order
-- **🎯 Go to Definition**: Jump directly to where a CSS variable is defined
-- **📊 Context-Aware Resolution**: Understands CSS specificity and shows which variable value actually applies
-- **🌐 Multi-Language Support**: Works with:
-  - CSS (`.css`)
-  - Preprocessors (`.scss`, `.sass`, `.less`)
-  - HTML (`.html`)
-  - JavaScript/TypeScript (`.js`, `.ts`, `.jsx`, `.tsx`)
-- **⚡ Real-Time Updates**: Automatically detects changes across all supported files in your workspace
+- Workspace indexing of CSS variables across `.css`, `.scss`, `.sass`, `.less`, and HTML `<style>` blocks / inline styles.
+- Context-aware completion for `var(--...)` and CSS property values.
+- Hover that shows cascade-ordered definitions (`!important`, specificity, source order).
+- Go to definition and find references for CSS variables.
+- Color decorations on `var(--...)` usages (the extension runs the LSP with `--color-only-variables`).
+- Works in CSS, SCSS, Sass, Less, HTML, JavaScript/TypeScript (JSX/TSX), Svelte, Vue, Astro, and PostCSS.
 
 ## Installation
 
-### Development Setup
+1. Open VS Code
+2. Go to Extensions (Cmd+Shift+X or Ctrl+Shift+X)
+3. Search for "CSS Variables (LSP)"
+4. Click Install
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Compile the extension:
-   ```bash
-   npm run compile
-   ```
-4. Press `F5` in VSCode to launch the Extension Development Host
+The extension bundles `css-variable-lsp` and runs it inside VS Code's extension host. No additional Node.js or npm setup is required.
 
-## Usage
+## Configuration
 
-The extension activates automatically when you open any supported file type.
+You can override the lookup globs and folder blacklist via VS Code settings. Open
+Settings JSON (Cmd+, then "Open Settings JSON") and add:
 
-### Example: Cross-File Variables
-
-**`theme.css`:**
-```css
-:root {
-  --primary-color: #007bff;
-  --secondary-color: #6c757d;
+```json
+{
+  "cssVariables.lookupFiles": ["**/*.css", "**/*.scss", "**/*.vue"],
+  "cssVariables.blacklistFolders": ["**/dist/**", "**/node_modules/**"]
 }
 ```
 
-**`component.css`:**
-```css
-.button {
-  background: var(--primary-color); /* Auto-complete works! */
-  border-color: var(--secondary-color);
-}
+Provided lists replace the defaults (include any defaults you still want).
+
+Defaults:
+
+- `lookupFiles`:
+  - `**/*.less`
+  - `**/*.scss`
+  - `**/*.sass`
+  - `**/*.css`
+  - `**/*.html`
+  - `**/*.vue`
+  - `**/*.svelte`
+  - `**/*.astro`
+  - `**/*.ripple`
+- `blacklistFolders`:
+  - `**/.cache/**`
+  - `**/.DS_Store`
+  - `**/.git/**`
+  - `**/.hg/**`
+  - `**/.next/**`
+  - `**/.svn/**`
+  - `**/bower_components/**`
+  - `**/CVS/**`
+  - `**/dist/**`
+  - `**/node_modules/**`
+  - `**/tests/**`
+  - `**/tmp/**`
+
+Both settings accept standard glob patterns (including brace expansions like `**/*.{css,scss}`).
+Note: these are glob patterns (not gitignore rules). To exclude files inside a directory,
+include `/**` at the end (for example `**/dist/**`).
+
+### Color Preview (Optional)
+
+- `cssVariables.colorOnlyVariables` (default `true`): show colors only for `var(--...)` usages.
+- `cssVariables.noColorPreview` (default `false`): disable color decorations entirely.
+
+### Completion Path Display (Optional)
+
+- `cssVariables.pathDisplay` (default `relative`): `relative`, `absolute`, or `abbreviated`.
+- `cssVariables.pathDisplayLength` (default `1`): segment length when using `abbreviated`.
+
+## LSP Flags & Environment
+
+The extension launches `css-variable-lsp` with `--color-only-variables` by default and
+passes settings as CLI flags:
+
+- `cssVariables.lookupFiles` -> repeated `--lookup-file` flags
+- `cssVariables.blacklistFolders` -> repeated `--ignore-glob` flags
+- `cssVariables.pathDisplay` -> `--path-display`
+- `cssVariables.pathDisplayLength` -> `--path-display-length`
+- `cssVariables.noColorPreview` -> `--no-color-preview`
+
+Supported LSP flags:
+
+- `--no-color-preview`
+- `--color-only-variables`
+- `--lookup-files "<glob>,<glob>"`
+- `--lookup-file "<glob>"` (repeatable)
+- `--ignore-globs "<glob>,<glob>"`
+- `--ignore-glob "<glob>"` (repeatable)
+- `--path-display=relative|absolute|abbreviated`
+- `--path-display-length=N`
+
+Supported environment variables:
+
+- `CSS_LSP_COLOR_ONLY_VARIABLES=1`
+- `CSS_LSP_LOOKUP_FILES` (comma-separated globs)
+- `CSS_LSP_IGNORE_GLOBS` (comma-separated globs)
+- `CSS_LSP_DEBUG=1`
+- `CSS_LSP_PATH_DISPLAY=relative|absolute|abbreviated`
+- `CSS_LSP_PATH_DISPLAY_LENGTH=1`
+
+Defaults:
+
+- `path-display`: `relative`
+- `path-display-length`: `1`
+
+### Completion Path Examples
+
+Assume a variable is defined in `/Users/you/project/src/styles/theme.css` and your workspace root is `/Users/you/project`.
+
+- `--path-display=relative` (default):
+  - `Defined in src/styles/theme.css`
+- `--path-display=absolute`:
+  - `Defined in /Users/you/project/src/styles/theme.css`
+- `--path-display=abbreviated --path-display-length=1`:
+  - `Defined in s/s/theme.css`
+- `--path-display=abbreviated --path-display-length=2`:
+  - `Defined in sr/st/theme.css`
+- `--path-display=abbreviated --path-display-length=0`:
+  - `Defined in src/styles/theme.css`
+
+## Development
+
+### Prerequisites
+
+- Node.js (v16+ recommended)
+- npm
+
+### Building
+
+```bash
+npm install
+npm run compile
 ```
 
-**`App.jsx`:**
-```jsx
-const styles = {
-  color: 'var(--primary-color)' // Works in JS/TS too!
-};
-```
+### Running
 
-### Example: Context-Specific Resolution
+1. Open this project in VS Code
+2. Press `F5` to launch the Extension Development Host
+3. Open a folder containing CSS files
 
-When you hover over a CSS variable, the extension shows the complete CSS cascade:
+## Known Limitations
 
-```css
-:root {
-  --color: red;
-}
-div {
-  --color: blue;
-}
-.special {
-  --color: green !important;
-}
-```
+- Cascade resolution is best-effort; the LSP does not model DOM nesting or selector combinators.
+- Rename operations replace full declarations/usages and may adjust formatting.
 
-Hovering over `var(--color)` in `div.special` context shows:
-
-```
-1. green from .special (0,1,0) !important ✓ Wins
-2. blue from div (0,0,1) (overridden by !important)
-3. red from :root (0,1,0) (lower specificity)
-```
-
-## Features in Detail
-
-### Cross-File Variable Tracking
-
-The language server indexes all CSS variables across your workspace, including:
-
-- Standard CSS files
-- Preprocessor files
-- HTML `<style>` blocks
-- JavaScript/TypeScript strings
-
-### CSS Cascade Intelligence
-
-The server understands CSS specificity rules:
-- Calculates selector specificity (IDs, classes, elements)
-- Respects `!important` declarations
-- Considers inline styles
-- Tracks source order for equal specificity
-
-### HTML DOM Awareness
-
-Parses HTML structure to provide context-specific variable resolution based on the DOM tree and CSS selectors.
-
-## License
-
-MIT
