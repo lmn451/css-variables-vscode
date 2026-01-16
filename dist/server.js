@@ -46394,7 +46394,6 @@ var require_colorService = __commonJS({
     exports2.formatColorAsRgb = formatColorAsRgb;
     exports2.formatColorAsHsl = formatColorAsHsl;
     function parseColor(value, options = {}) {
-      options = { allowNamedColors: true, ...options };
       value = value.trim().toLowerCase();
       if (value.startsWith("#")) {
         return parseHex(value);
@@ -47366,7 +47365,7 @@ var require_cssVariableManager = __commonJS({
         if (recursiveMatch) {
           return this.resolveVariableColor(recursiveMatch[1], context, seen);
         }
-        return (0, colorService_1.parseColor)(value);
+        return (0, colorService_1.parseColor)(value, { allowNamedColors: true });
       }
     };
     exports2.CssVariableManager = CssVariableManager;
@@ -47391,7 +47390,7 @@ var require_colorProvider = __commonJS({
       if (!options.onlyVariables) {
         const definitions = cssVariableManager2.getDocumentDefinitions(document.uri);
         for (const def of definitions) {
-          const color = (0, colorService_1.parseColor)(def.value);
+          const color = (0, colorService_1.parseColor)(def.value, { allowNamedColors: true });
           if (color) {
             if (def.valueRange) {
               colors.push({

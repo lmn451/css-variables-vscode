@@ -2,7 +2,7 @@
   "name": "css-variables-vscode",
   "displayName": "CSS Variables (LSP)",
   "description": "Project-wide CSS variable autocomplete, hover, go-to-definition and color support via css-variable-lsp.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "miclmn451",
   "icon": "icon.png",
   "repository": {
@@ -122,7 +122,7 @@
     "package": "vsce package"
   },
   "dependencies": {
-    "css-variable-lsp": "^1.0.13",
+    "css-variable-lsp": "^1.0.14",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
