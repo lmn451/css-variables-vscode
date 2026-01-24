@@ -1,6 +1,7 @@
 src/**
 tsconfig.json
 .vscode/**
+.beads/**
 .gitignore
 *.vsix
 node_modules

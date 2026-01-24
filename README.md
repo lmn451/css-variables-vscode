@@ -7,6 +7,7 @@ Project-wide CSS custom properties (variables) support for VS Code, powered by `
 - Workspace indexing of CSS variables across `.css`, `.scss`, `.sass`, `.less`, and HTML `<style>` blocks / inline styles.
 - Context-aware completion for `var(--...)` and CSS property values.
 - Hover that shows cascade-ordered definitions (`!important`, specificity, source order).
+- Configurable severity for undefined variable hover diagnostics.
 - Go to definition and find references for CSS variables.
 - Color decorations on `var(--...)` usages (the extension runs the LSP with `--color-only-variables`).
 - Works in CSS, SCSS, Sass, Less, HTML, JavaScript/TypeScript (JSX/TSX), Svelte, Vue, Astro, and PostCSS.
