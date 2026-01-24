@@ -74,6 +74,10 @@ include `/**` at the end (for example `**/dist/**`).
 - `cssVariables.pathDisplay` (default `relative`): `relative`, `absolute`, or `abbreviated`.
 - `cssVariables.pathDisplayLength` (default `1`): segment length when using `abbreviated`.
 
+### Undefined Variable Hover (Optional)
+
+- `cssVariables.undefinedVarFallback` (default `warning`): `warning`, `info`, or `off`.
+
 ## LSP Flags & Environment
 
 The extension launches `css-variable-lsp` with `--color-only-variables` by default and
@@ -84,6 +88,7 @@ passes settings as CLI flags:
 - `cssVariables.pathDisplay` -> `--path-display`
 - `cssVariables.pathDisplayLength` -> `--path-display-length`
 - `cssVariables.noColorPreview` -> `--no-color-preview`
+- `cssVariables.undefinedVarFallback` -> `--undefined-var-fallback`
 
 Supported LSP flags:
 
@@ -95,6 +100,7 @@ Supported LSP flags:
 - `--ignore-glob "<glob>"` (repeatable)
 - `--path-display=relative|absolute|abbreviated`
 - `--path-display-length=N`
+- `--undefined-var-fallback=warning|info|off`
 
 Supported environment variables:
 
@@ -104,11 +110,13 @@ Supported environment variables:
 - `CSS_LSP_DEBUG=1`
 - `CSS_LSP_PATH_DISPLAY=relative|absolute|abbreviated`
 - `CSS_LSP_PATH_DISPLAY_LENGTH=1`
+- `CSS_LSP_UNDEFINED_VAR_FALLBACK=warning|info|off`
 
 Defaults:
 
 - `path-display`: `relative`
 - `path-display-length`: `1`
+- `undefined-var-fallback`: `warning`
 
 ### Completion Path Examples
 
@@ -149,4 +157,3 @@ npm run compile
 
 - Cascade resolution is best-effort; the LSP does not model DOM nesting or selector combinators.
 - Rename operations replace full declarations/usages and may adjust formatting.
-

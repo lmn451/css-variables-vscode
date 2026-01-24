@@ -47633,6 +47633,27 @@ var require_runtimeConfig = __commonJS({
           return null;
       }
     }
+    function normalizeUndefinedVarFallbackMode(value) {
+      if (!value) {
+        return null;
+      }
+      switch (value.toLowerCase()) {
+        case "warn":
+        case "warning":
+          return "warning";
+        case "info":
+        case "information":
+          return "info";
+        case "off":
+        case "omit":
+        case "none":
+        case "disable":
+        case "disabled":
+          return "off";
+        default:
+          return null;
+      }
+    }
     function parsePathDisplay(value) {
       if (!value) {
         return { mode: null, abbrevLength: null };
@@ -47726,13 +47747,17 @@ var require_runtimeConfig = __commonJS({
       const pathDisplayLengthEnv = env.CSS_LSP_PATH_DISPLAY_LENGTH;
       const abbrevLengthRaw = parseOptionalInt(pathDisplayLengthArg ?? pathDisplayLengthEnv) ?? parsedPathDisplay.abbrevLength;
       const pathDisplayAbbrevLength = Math.max(0, abbrevLengthRaw ?? 1);
+      const undefinedVarFallbackArg = getArgValue(argv, "undefined-var-fallback");
+      const undefinedVarFallbackEnv = env.CSS_LSP_UNDEFINED_VAR_FALLBACK;
+      const undefinedVarFallback = normalizeUndefinedVarFallbackMode(undefinedVarFallbackArg ?? undefinedVarFallbackEnv) ?? "warning";
       return {
         enableColorProvider,
         colorOnlyOnVariables,
         lookupFiles,
         ignoreGlobs,
         pathDisplayMode,
-        pathDisplayAbbrevLength
+        pathDisplayAbbrevLength,
+        undefinedVarFallback
       };
     }
   }
@@ -47827,32 +47852,56 @@ documents.onDidClose(async (e) => {
   await cssVariableManager.updateFile(e.document.uri);
 });
 var validationTimeouts = /* @__PURE__ */ new Map();
-documents.onDidChangeContent((change) => {
-  cssVariableManager.parseDocument(change.document);
-  const uri = change.document.uri;
+var validateAllTimeout = null;
+function scheduleValidation(textDocument) {
+  const uri = textDocument.uri;
   const existingTimeout = validationTimeouts.get(uri);
   if (existingTimeout) {
     clearTimeout(existingTimeout);
   }
   const timeout = setTimeout(() => {
-    validateTextDocument(change.document);
+    validateTextDocument(textDocument);
     validationTimeouts.delete(uri);
   }, 300);
   validationTimeouts.set(uri, timeout);
+}
+function scheduleValidateAllOpenDocuments(excludeUri) {
+  if (validateAllTimeout) {
+    clearTimeout(validateAllTimeout);
+  }
+  validateAllTimeout = setTimeout(() => {
+    documents.all().forEach((document) => {
+      if (excludeUri && document.uri === excludeUri) {
+        return;
+      }
+      validateTextDocument(document);
+    });
+    validateAllTimeout = null;
+  }, 300);
+}
+documents.onDidChangeContent((change) => {
+  cssVariableManager.parseDocument(change.document);
+  scheduleValidation(change.document);
+  scheduleValidateAllOpenDocuments(change.document.uri);
 });
 async function validateTextDocument(textDocument) {
   const text = textDocument.getText();
   const diagnostics = [];
-  const usageRegex = /var\((--[\w-]+)(?:\s*,\s*[^)]+)?\)/g;
+  const usageRegex = /var\((--[\w-]+)(?:\s*,\s*([^)]+))?\)/g;
   let match;
   while ((match = usageRegex.exec(text)) !== null) {
     const variableName = match[1];
+    const hasFallback = Boolean(match[2]);
     const definitions = cssVariableManager.getVariables(variableName);
     if (definitions.length === 0) {
+      if (hasFallback && runtimeConfig.undefinedVarFallback === "off") {
+        continue;
+      }
+      const severity = hasFallback && runtimeConfig.undefinedVarFallback === "info" ? node_1.DiagnosticSeverity.Information : node_1.DiagnosticSeverity.Warning;
       const startPos = textDocument.positionAt(match.index);
       const endPos = textDocument.positionAt(match.index + match[0].length);
       const diagnostic = {
-        severity: node_1.DiagnosticSeverity.Warning,
+        severity,
         range: {
           start: startPos,
           end: endPos

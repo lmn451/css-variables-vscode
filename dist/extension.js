@@ -18081,6 +18081,28 @@ function normalizePathDisplayLength(value) {
   }
   return Math.floor(value);
 }
+function normalizeUndefinedVarFallback(value) {
+  if (typeof value !== "string") {
+    return void 0;
+  }
+  const normalized = value.trim().toLowerCase();
+  switch (normalized) {
+    case "warning":
+    case "warn":
+      return "warning";
+    case "info":
+    case "information":
+      return "info";
+    case "off":
+    case "disable":
+    case "disabled":
+    case "none":
+    case "omit":
+      return "off";
+    default:
+      return void 0;
+  }
+}
 function readCssVariablesConfig() {
   const config = import_vscode.workspace.getConfiguration("cssVariables");
   const lookupFiles = normalizeStringArray(
@@ -18095,13 +18117,17 @@ function readCssVariablesConfig() {
   const noColorPreview = config.get("noColorPreview", false);
   const pathDisplay = normalizePathDisplay(config.get("pathDisplay"));
   const pathDisplayLength = normalizePathDisplayLength(config.get("pathDisplayLength"));
+  const undefinedVarFallback = normalizeUndefinedVarFallback(
+    config.get("undefinedVarFallback")
+  );
   return {
     lookupFiles,
     blacklistFolders,
     colorOnlyVariables,
     noColorPreview,
     pathDisplay,
-    pathDisplayLength
+    pathDisplayLength,
+    undefinedVarFallback
   };
 }
 function buildServerArgs(config) {
@@ -18122,6 +18148,9 @@ function buildServerArgs(config) {
   }
   if (config.pathDisplayLength !== void 0) {
     args.push("--path-display-length", String(config.pathDisplayLength));
+  }
+  if (config.undefinedVarFallback) {
+    args.push("--undefined-var-fallback", config.undefinedVarFallback);
   }
   return args;
 }

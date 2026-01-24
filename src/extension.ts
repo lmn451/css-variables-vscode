@@ -52,6 +52,7 @@ const LANGUAGE_IDS = [
 ];
 
 type PathDisplayMode = 'relative' | 'absolute' | 'abbreviated';
+type UndefinedVarFallbackMode = 'warning' | 'info' | 'off';
 
 type CssVariablesConfig = {
 	lookupFiles: string[];
@@ -60,6 +61,7 @@ type CssVariablesConfig = {
 	noColorPreview: boolean;
 	pathDisplay?: PathDisplayMode;
 	pathDisplayLength?: number;
+	undefinedVarFallback?: UndefinedVarFallbackMode;
 };
 
 let client: LanguageClient | undefined;
@@ -94,6 +96,31 @@ function normalizePathDisplayLength(value: unknown): number | undefined {
 	return Math.floor(value);
 }
 
+function normalizeUndefinedVarFallback(
+	value: unknown
+): UndefinedVarFallbackMode | undefined {
+	if (typeof value !== 'string') {
+		return undefined;
+	}
+	const normalized = value.trim().toLowerCase();
+	switch (normalized) {
+		case 'warning':
+		case 'warn':
+			return 'warning';
+		case 'info':
+		case 'information':
+			return 'info';
+		case 'off':
+		case 'disable':
+		case 'disabled':
+		case 'none':
+		case 'omit':
+			return 'off';
+		default:
+			return undefined;
+	}
+}
+
 function readCssVariablesConfig(): CssVariablesConfig {
 	const config = workspace.getConfiguration('cssVariables');
 	const lookupFiles = normalizeStringArray(
@@ -108,6 +135,9 @@ function readCssVariablesConfig(): CssVariablesConfig {
 	const noColorPreview = config.get<boolean>('noColorPreview', false);
 	const pathDisplay = normalizePathDisplay(config.get('pathDisplay'));
 	const pathDisplayLength = normalizePathDisplayLength(config.get('pathDisplayLength'));
+	const undefinedVarFallback = normalizeUndefinedVarFallback(
+		config.get('undefinedVarFallback')
+	);
 
 	return {
 		lookupFiles,
@@ -115,7 +145,8 @@ function readCssVariablesConfig(): CssVariablesConfig {
 		colorOnlyVariables,
 		noColorPreview,
 		pathDisplay,
-		pathDisplayLength
+		pathDisplayLength,
+		undefinedVarFallback
 	};
 }
 
@@ -142,6 +173,10 @@ function buildServerArgs(config: CssVariablesConfig): string[] {
 
 	if (config.pathDisplayLength !== undefined) {
 		args.push('--path-display-length', String(config.pathDisplayLength));
+	}
+
+	if (config.undefinedVarFallback) {
+		args.push('--undefined-var-fallback', config.undefinedVarFallback);
 	}
 
 	return args;
