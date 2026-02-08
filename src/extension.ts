@@ -1,5 +1,5 @@
 import * as path from "path";
-import { workspace, ExtensionContext, FileSystemWatcher } from "vscode";
+import { workspace, ExtensionContext, FileSystemWatcher, window, OutputChannel } from "vscode";
 import {
   LanguageClient,
   LanguageClientOptions,
@@ -11,6 +11,7 @@ import {
   normalizePathDisplay,
   normalizePathDisplayLength,
   normalizeUndefinedVarFallback,
+  buildServerArgs,
 } from "./helpers";
 
 const DEFAULT_LOOKUP_FILES = [
@@ -74,6 +75,10 @@ let client: LanguageClient | undefined;
 let restartChain = Promise.resolve();
 let fileWatchers: FileSystemWatcher[] = [];
 let active = false;
+let outputChannel: OutputChannel | undefined;
+let configChangeTimer: NodeJS.Timeout | undefined;
+let fileEventTimer: NodeJS.Timeout | undefined;
+let pendingFileEvents: Array<string> = [];
 
 /* helpers moved to src/helpers.ts and imported above so tests can import helpers
    directly without pulling in `vscode` runtime imports. */
@@ -141,15 +146,36 @@ function buildServerArgs(config: CssVariablesConfig): string[] {
   return args;
 }
 
-function createFileWatchers(lookupFiles: string[]): FileSystemWatcher[] {
+function createFileWatchers(lookupFiles: string[], context: ExtensionContext): FileSystemWatcher[] {
   const patterns = lookupFiles.length > 0 ? lookupFiles : DEFAULT_LOOKUP_FILES;
   const uniquePatterns = Array.from(
     new Set(patterns.map((pattern) => pattern.trim()).filter(Boolean))
   );
 
-  return uniquePatterns.map((pattern) =>
-    workspace.createFileSystemWatcher(pattern)
-  );
+  function scheduleFileEvents() {
+    if (fileEventTimer) {
+      clearTimeout(fileEventTimer);
+    }
+    fileEventTimer = setTimeout(() => {
+      const events = pendingFileEvents.slice();
+      pendingFileEvents = [];
+      outputChannel?.appendLine(`[css-variables] File events: ${events.join(",")}`);
+      // Debounced restart to avoid thrashing on many fs events
+      void restartClient(context);
+    }, 300);
+  }
+
+  return uniquePatterns.map((pattern) => {
+    const watcher = workspace.createFileSystemWatcher(pattern);
+    const pushEvent = (type: string) => () => {
+      pendingFileEvents.push(`${type}:${pattern}`);
+      scheduleFileEvents();
+    };
+    watcher.onDidChange(pushEvent("change"));
+    watcher.onDidCreate(pushEvent("create"));
+    watcher.onDidDelete(pushEvent("delete"));
+    return watcher;
+  });
 }
 
 function disposeFileWatchers() {
@@ -165,7 +191,7 @@ function createClient(context: ExtensionContext): LanguageClient {
   const config = readCssVariablesConfig();
   const args = buildServerArgs(config);
   disposeFileWatchers();
-  fileWatchers = createFileWatchers(config.lookupFiles);
+  fileWatchers = createFileWatchers(config.lookupFiles, context);
 
   // register watchers so they are disposed automatically when the extension
   // context is disposed. We still keep `fileWatchers` for manual control.
@@ -219,6 +245,7 @@ async function restartClient(context: ExtensionContext) {
       client = createClient(context);
       await client.start();
     } catch (error) {
+      outputChannel?.appendLine("[css-variables] Failed to restart language client: " + String(error));
       console.error("[css-variables] Failed to restart language client", error);
     }
   });
@@ -228,17 +255,20 @@ async function restartClient(context: ExtensionContext) {
 export function activate(context: ExtensionContext) {
   active = true;
 
+  outputChannel = window.createOutputChannel("CSS Variables");
+  context.subscriptions.push(outputChannel);
+
   client = createClient(context);
-  void client
-    .start()
-    .catch((err) =>
-      console.error("[css-variables] Failed to start language client", err)
-    );
+  void client.start().catch((err) => {
+    outputChannel?.appendLine("[css-variables] Failed to start language client: " + String(err));
+    console.error("[css-variables] Failed to start language client", err);
+  });
 
   context.subscriptions.push(
     workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration("cssVariables")) {
-        void restartClient(context);
+        if (configChangeTimer) clearTimeout(configChangeTimer);
+        configChangeTimer = setTimeout(() => void restartClient(context), 250);
       }
     })
   );
