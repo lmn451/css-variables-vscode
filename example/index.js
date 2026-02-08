@@ -1,1 +1,7 @@
-const Example = () => <div style="color: var(--primary);" />;
+// Simple example demonstrating a usage of a CSS variable in inline styles.
+// Use this file to verify the extension can pick up `var(--primary)` in JS files.
+const Example = () => {
+  return '<div style="color: var(--primary);">example</div>';
+};
+
+module.exports = { Example };
