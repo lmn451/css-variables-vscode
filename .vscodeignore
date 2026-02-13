@@ -1,10 +1,54 @@
+# Source files
 src/**
 tsconfig.json
+.eslintrc.json
+.prettierrc
+
+# Build files
+esbuild.js
+*.tsbuildinfo
+
+# IDE files
 .vscode/**
+.vscode-test/**
+
+# Development files
 .beads/**
 .gitignore
+.gitattributes
+
+# Test files
+test/**
+coverage/**
+jest.config.cjs
+
+# Output files
 *.vsix
+out/**
+
+# Node modules (dependencies are bundled)
 node_modules
-out
-esbuild.js
-.eslintrc.json
+
+# Scripts (used for development/build only)
+scripts/**
+
+# Binary directory - by default include all for universal package
+# For platform-specific builds, use:
+#   !bin/css-variable-lsp-darwin-arm64
+#   bin/css-variable-lsp-*
+# Or generate dynamically during build
+bin/**/*.tar.gz
+bin/**/*.zip
+
+# Documentation (keep README.md)
+CONTRIBUTING.md
+walkthrough.md
+example/**
+
+# CI/CD
+.github/**
+.husky/**
+
+# Misc
+.DS_Store
+*.log

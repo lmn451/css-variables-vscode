@@ -119,6 +119,21 @@
           ],
           "default": "warning",
           "description": "Fallback severity when hovering undefined CSS variables."
+        },
+        "cssVariables.serverImplementation": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "rust",
+            "typescript"
+          ],
+          "default": "auto",
+          "description": "Server implementation. 'auto' tries Rust first, falls back to TypeScript. 'rust' or 'typescript' forces a specific implementation."
+        },
+        "cssVariables.serverBinaryPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to custom css-lsp-rust binary (overrides bundled binary). Only used when serverImplementation is 'auto' or 'rust'."
         }
       }
     }
@@ -135,27 +150,32 @@
     "lint": "eslint 'src/**' --ext .ts",
     "format": "prettier --write .",
     "prettier:check": "prettier --check .",
-    "package": "vsce package"
+    "test:integration": "node ./test/runTest.js",
+    "package": "vsce package",
+    "download-binaries": "node scripts/download-binaries.js"
   },
   "dependencies": {
+    "@vscode/test-electron": "^2.5.2",
     "css-variable-lsp": "^1.0.16",
+    "glob": "^13.0.1",
+    "mocha": "^11.7.5",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.2",
     "@types/node": "^18.14.6",
     "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
     "@vscode/vsce": "3.7.0",
     "esbuild": "^0.27.0",
-    "typescript": "^5.9.3",
-    "jest": "^29.6.1",
-    "ts-jest": "^29.1.0",
-    "@types/jest": "^29.5.2",
     "eslint": "^8.46.0",
-    "@typescript-eslint/parser": "^5.60.0",
-    "@typescript-eslint/eslint-plugin": "^5.60.0",
-    "prettier": "^2.8.8",
     "husky": "^8.0.3",
-    "lint-staged": "^13.2.0"
+    "jest": "^29.6.1",
+    "lint-staged": "^13.2.0",
+    "prettier": "^2.8.8",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "src/**/*.{ts,js}": [

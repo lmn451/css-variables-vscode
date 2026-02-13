@@ -19,7 +19,27 @@ Project-wide CSS custom properties (variables) support for VS Code, powered by `
 3. Search for "CSS Variables (LSP)"
 4. Click Install
 
-The extension bundles `css-variable-lsp` and runs it inside VS Code's extension host. No additional Node.js or npm setup is required.
+The extension bundles both a high-performance Rust LSP server and a TypeScript fallback. The Rust server is used automatically when available on your platform, with automatic fallback to TypeScript if needed.
+
+## LSP Server Implementation
+
+This extension supports two LSP server implementations:
+
+### Rust LSP (Recommended)
+
+- **Performance**: Native binary, faster startup and lower memory usage
+- **Size**: ~2MB per platform
+- **Transport**: stdio
+- **Availability**: macOS (x64/ARM64), Linux (x64/ARM64), Windows (x64/ARM64)
+
+### TypeScript LSP (Fallback)
+
+- **Compatibility**: Works on all platforms where Node.js runs
+- **Size**: ~4MB bundled
+- **Transport**: IPC
+- **Availability**: Universal fallback
+
+The extension automatically selects the best available server based on your platform. You can control this behavior with the `cssVariables.serverImplementation` setting.
 
 ## Configuration
 
@@ -64,6 +84,38 @@ Defaults:
 Both settings accept standard glob patterns (including brace expansions like `**/*.{css,scss}`).
 Note: these are glob patterns (not gitignore rules). To exclude files inside a directory,
 include `/**` at the end (for example `**/dist/**`).
+
+### Server Implementation (New)
+
+Control which LSP server implementation to use:
+
+- `cssVariables.serverImplementation` (default `"auto"`):
+
+  - `"auto"` - Try Rust first, fall back to TypeScript if unavailable
+  - `"rust"` - Use only the Rust implementation (fails if not available)
+  - `"typescript"` - Use only the TypeScript implementation
+
+- `cssVariables.serverBinaryPath` (default `""`):
+  - Path to a custom css-lsp-rust binary
+  - Only used when `serverImplementation` is `"auto"` or `"rust"`
+  - Useful for testing development builds or using a system-installed binary
+
+Example configuration to force TypeScript:
+
+```json
+{
+  "cssVariables.serverImplementation": "typescript"
+}
+```
+
+Example configuration with custom binary:
+
+```json
+{
+  "cssVariables.serverImplementation": "rust",
+  "cssVariables.serverBinaryPath": "/usr/local/bin/css-variable-lsp"
+}
+```
 
 ### Color Preview (Optional)
 
@@ -140,11 +192,17 @@ Assume a variable is defined in `/Users/you/project/src/styles/theme.css` and yo
 
 - Node.js (v16+ recommended)
 - npm
+- (Optional) Rust toolchain if building the LSP from source
 
 ### Building
 
 ```bash
 npm install
+
+# Download Rust LSP binaries (optional, for testing Rust implementation)
+npm run download-binaries
+
+# Compile the extension
 npm run compile
 ```
 
@@ -154,7 +212,76 @@ npm run compile
 2. Press `F5` to launch the Extension Development Host
 3. Open a folder containing CSS files
 
+The extension will automatically detect whether Rust binaries are available and use the appropriate server.
+
+### Platform-Specific Development
+
+When developing on a specific platform, you can download only the binary for your platform:
+
+```bash
+# This downloads all platform binaries
+node scripts/download-binaries.js
+
+# Binaries are stored in bin/ directory
+ls bin/
+```
+
+### Testing Different Implementations
+
+To test with a specific server implementation:
+
+```json
+// Force TypeScript implementation
+{
+  "cssVariables.serverImplementation": "typescript"
+}
+
+// Force Rust implementation (requires binary)
+{
+  "cssVariables.serverImplementation": "rust"
+}
+```
+
+## Troubleshooting
+
+### Extension shows "No LSP server available"
+
+This means neither the Rust nor TypeScript server could be found. Check:
+
+1. The extension was built correctly (`npm run compile`)
+2. For Rust: Binary exists at expected path (check Output panel > "CSS Variables")
+3. For TypeScript: `dist/server.js` exists or `css-variable-lsp` npm package is installed
+
+### Rust binary not found on supported platform
+
+The extension will automatically fall back to TypeScript. To investigate:
+
+1. Check the Output panel (View > Output > "CSS Variables")
+2. Verify the binary exists: `ls bin/css-variable-lsp-*`
+3. Try running manually: `./bin/css-variable-lsp-darwin-arm64 --version`
+
+### Switching implementations
+
+If you encounter issues with one implementation, force the other:
+
+```json
+{
+  "cssVariables.serverImplementation": "typescript"
+}
+```
+
+Then reload the window (Cmd+Shift+P > "Developer: Reload Window").
+
 ## Known Limitations
 
 - Cascade resolution is best-effort; the LSP does not model DOM nesting or selector combinators.
 - Rename operations replace full declarations/usages and may adjust formatting.
+- Windows ARM64 support is experimental.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+
+## License
+
+GPL-3.0

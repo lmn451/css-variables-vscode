@@ -1,0 +1,243 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  # Build and test first
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download Rust LSP binaries
+        run: node scripts/download-binaries.js
+
+      - name: Run type check
+        run: npm run check-types
+
+      - name: Run tests
+        run: npm run test:ci
+
+      - name: Build extension
+        run: npm run compile
+
+  # Build and publish for each platform
+  publish:
+    name: Publish ${{ matrix.target }}
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macOS ARM64 (Apple Silicon)
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
+            target: darwin-arm64
+            binary: css-variable-lsp-darwin-arm64
+
+          # macOS x64 (Intel)
+          - os: macos-latest
+            platform: darwin
+            arch: x64
+            target: darwin-x64
+            binary: css-variable-lsp-darwin-x64
+
+          # Linux x64
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            target: linux-x64
+            binary: css-variable-lsp-linux-x64
+
+          # Linux ARM64
+          - os: ubuntu-latest
+            platform: linux
+            arch: arm64
+            target: linux-arm64
+            binary: css-variable-lsp-linux-arm64
+
+          # Windows x64
+          - os: windows-latest
+            platform: win32
+            arch: x64
+            target: win32-x64
+            binary: css-variable-lsp-win32-x64.exe
+
+          # Windows ARM64
+          - os: windows-latest
+            platform: win32
+            arch: arm64
+            target: win32-arm64
+            binary: css-variable-lsp-win32-arm64.exe
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download all Rust LSP binaries
+        run: node scripts/download-binaries.js
+
+      - name: Create platform-specific .vscodeignore
+        shell: bash
+        run: |
+          # Create a platform-specific .vscodeignore that only includes the target binary
+          cat > .vscodeignore.platform << 'EOF'
+          # Source files
+          src/**
+          tsconfig.json
+          .eslintrc.json
+          .prettierrc
+
+          # Build files
+          esbuild.js
+          *.tsbuildinfo
+
+          # IDE files
+          .vscode/**
+          .vscode-test/**
+
+          # Development files
+          .beads/**
+          .gitignore
+          .gitattributes
+
+          # Test files
+          test/**
+          coverage/**
+          jest.config.cjs
+
+          # Output files
+          *.vsix
+          out/**
+
+          # Node modules (dependencies are bundled)
+          node_modules
+
+          # Scripts (used for development/build only)
+          scripts/**
+
+          # Exclude all binaries except target
+          bin/**
+          !bin/${{ matrix.binary }}
+          !bin/version.json
+
+          # Documentation (keep README.md)
+          CONTRIBUTING.md
+          walkthrough.md
+          example/**
+
+          # CI/CD
+          .github/**
+          .husky/**
+
+          # Misc
+          .DS_Store
+          *.log
+          EOF
+          mv .vscodeignore.platform .vscodeignore
+
+      - name: Build extension
+        run: npm run compile
+
+      - name: Package extension
+        run: npx vsce package --target ${{ matrix.target }} --out css-variables-vscode-${{ matrix.target }}.vsix
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: css-variables-vscode-${{ matrix.target }}
+          path: css-variables-vscode-${{ matrix.target }}.vsix
+
+      - name: Publish to VS Code Marketplace
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        run: npx vsce publish --target ${{ matrix.target }} --packagePath css-variables-vscode-${{ matrix.target }}.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+  # Create GitHub Release with all artifacts
+  release:
+    name: Create GitHub Release
+    needs: publish
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: css-variables-vscode-*
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/**/*.vsix
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+
+  # Publish universal package (all platforms bundled)
+  publish-universal:
+    name: Publish Universal Package
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download all Rust LSP binaries
+        run: node scripts/download-binaries.js
+
+      - name: Build extension
+        run: npm run compile
+
+      - name: Package universal extension
+        run: npx vsce package --out css-variables-vscode.vsix
+
+      - name: Publish universal to VS Code Marketplace
+        run: npx vsce publish --packagePath css-variables-vscode.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      - name: Upload universal artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: css-variables-vscode-universal
+          path: css-variables-vscode.vsix
