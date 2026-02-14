@@ -30,6 +30,8 @@ jobs:
 
       - name: Download Rust LSP binaries
         run: node scripts/download-binaries.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run type check
         run: npm run check-types
@@ -105,6 +107,8 @@ jobs:
 
       - name: Download all Rust LSP binaries
         run: node scripts/download-binaries.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create platform-specific .vscodeignore
         shell: bash
@@ -224,6 +228,8 @@ jobs:
 
       - name: Download all Rust LSP binaries
         run: node scripts/download-binaries.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build extension
         run: npm run compile

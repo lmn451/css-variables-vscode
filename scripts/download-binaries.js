@@ -13,6 +13,10 @@ const { execSync } = require('child_process');
 const GITHUB_API_URL =
   'https://api.github.com/repos/lmn451/css-lsp-rust/releases/latest';
 const BIN_DIR = path.join(__dirname, '..', 'bin');
+const GITHUB_TOKEN =
+  process.env.GITHUB_TOKEN ||
+  process.env.GH_TOKEN ||
+  process.env.GITHUB_API_TOKEN;
 
 // Platform mapping: GitHub asset name -> local binary name
 const PLATFORMS = [
@@ -50,6 +54,9 @@ function fetchJson(url) {
         Accept: 'application/vnd.github.v3+json',
       },
     };
+    if (GITHUB_TOKEN) {
+      options.headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
+    }
 
     https
       .get(url, options, (res) => {
@@ -85,6 +92,9 @@ function downloadFile(url, destPath) {
         'User-Agent': 'css-variables-vscode-extension',
       },
     };
+    if (GITHUB_TOKEN) {
+      options.headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
+    }
 
     https
       .get(url, options, (res) => {
