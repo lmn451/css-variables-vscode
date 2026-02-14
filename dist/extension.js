@@ -3098,8 +3098,8 @@ var require_main = __commonJS({
     exports2.createMessageConnection = exports2.createServerSocketTransport = exports2.createClientSocketTransport = exports2.createServerPipeTransport = exports2.createClientPipeTransport = exports2.generateRandomPipeName = exports2.StreamMessageWriter = exports2.StreamMessageReader = exports2.SocketMessageWriter = exports2.SocketMessageReader = exports2.PortMessageWriter = exports2.PortMessageReader = exports2.IPCMessageWriter = exports2.IPCMessageReader = void 0;
     var ril_1 = require_ril();
     ril_1.default.install();
-    var path2 = require("path");
-    var os = require("os");
+    var path3 = require("path");
+    var os2 = require("os");
     var crypto_1 = require("crypto");
     var net_1 = require("net");
     var api_1 = require_api();
@@ -3234,9 +3234,9 @@ var require_main = __commonJS({
       }
       let result;
       if (XDG_RUNTIME_DIR) {
-        result = path2.join(XDG_RUNTIME_DIR, `vscode-ipc-${randomSuffix}.sock`);
+        result = path3.join(XDG_RUNTIME_DIR, `vscode-ipc-${randomSuffix}.sock`);
       } else {
-        result = path2.join(os.tmpdir(), `vscode-${randomSuffix}.sock`);
+        result = path3.join(os2.tmpdir(), `vscode-${randomSuffix}.sock`);
       }
       const limit = safeIpcPathLengths.get(process.platform);
       if (limit !== void 0 && result.length > limit) {
@@ -9417,8 +9417,8 @@ var require_minimatch = __commonJS({
       return new Minimatch(pattern, options).match(p);
     };
     module2.exports = minimatch;
-    var path2 = require_path();
-    minimatch.sep = path2.sep;
+    var path3 = require_path();
+    minimatch.sep = path3.sep;
     var GLOBSTAR = Symbol("globstar **");
     minimatch.GLOBSTAR = GLOBSTAR;
     var expand = require_brace_expansion();
@@ -9927,8 +9927,8 @@ var require_minimatch = __commonJS({
         if (this.empty) return f === "";
         if (f === "/" && partial) return true;
         const options = this.options;
-        if (path2.sep !== "/") {
-          f = f.split(path2.sep).join("/");
+        if (path3.sep !== "/") {
+          f = f.split(path3.sep).join("/");
         }
         f = f.split(slashSplit);
         this.debug(this.pattern, "split", f);
@@ -11653,13 +11653,13 @@ var require_configuration = __commonJS({
         });
       }
       extractSettingsInformation(keys) {
-        function ensurePath(config, path2) {
+        function ensurePath(config, path3) {
           let current = config;
-          for (let i = 0; i < path2.length - 1; i++) {
-            let obj = current[path2[i]];
+          for (let i = 0; i < path3.length - 1; i++) {
+            let obj = current[path3[i]];
             if (!obj) {
               obj = /* @__PURE__ */ Object.create(null);
-              current[path2[i]] = obj;
+              current[path3[i]] = obj;
             }
             current = obj;
           }
@@ -11677,8 +11677,8 @@ var require_configuration = __commonJS({
             config = vscode_1.workspace.getConfiguration(void 0, resource).get(key);
           }
           if (config) {
-            let path2 = keys[i].split(".");
-            ensurePath(result, path2)[path2[path2.length - 1]] = toJSONObject(config);
+            let path3 = keys[i].split(".");
+            ensurePath(result, path3)[path3[path3.length - 1]] = toJSONObject(config);
           }
         }
         return result;
@@ -14245,13 +14245,13 @@ var require_fileOperations = __commonJS({
       async filter(event, prop) {
         const fileMatches = await Promise.all(event.files.map(async (item) => {
           const uri = prop(item);
-          const path2 = uri.fsPath.replace(/\\/g, "/");
+          const path3 = uri.fsPath.replace(/\\/g, "/");
           for (const filters of this._filters.values()) {
             for (const filter of filters) {
               if (filter.scheme !== void 0 && filter.scheme !== uri.scheme) {
                 continue;
               }
-              if (filter.matcher.match(path2)) {
+              if (filter.matcher.match(path3)) {
                 if (filter.kind === void 0) {
                   return true;
                 }
@@ -14265,7 +14265,7 @@ var require_fileOperations = __commonJS({
                 }
               } else if (filter.kind === proto.FileOperationPatternKind.folder) {
                 const fileType = await _FileOperationFeature.getFileType(uri);
-                if (fileType === code.FileType.Directory && filter.matcher.match(`${path2}/`)) {
+                if (fileType === code.FileType.Directory && filter.matcher.match(`${path3}/`)) {
                   return true;
                 }
               }
@@ -17491,8 +17491,8 @@ var require_main4 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.SettingMonitor = exports2.LanguageClient = exports2.TransportKind = void 0;
     var cp = require("child_process");
-    var fs = require("fs");
-    var path2 = require("path");
+    var fs2 = require("fs");
+    var path3 = require("path");
     var vscode_1 = require("vscode");
     var Is = require_is();
     var client_1 = require_client();
@@ -17910,19 +17910,19 @@ var require_main4 = __commonJS({
         });
       }
       _getRuntimePath(runtime, serverWorkingDirectory) {
-        if (path2.isAbsolute(runtime)) {
+        if (path3.isAbsolute(runtime)) {
           return runtime;
         }
         const mainRootPath = this._mainGetRootPath();
         if (mainRootPath !== void 0) {
-          const result = path2.join(mainRootPath, runtime);
-          if (fs.existsSync(result)) {
+          const result = path3.join(mainRootPath, runtime);
+          if (fs2.existsSync(result)) {
             return result;
           }
         }
         if (serverWorkingDirectory !== void 0) {
-          const result = path2.join(serverWorkingDirectory, runtime);
-          if (fs.existsSync(result)) {
+          const result = path3.join(serverWorkingDirectory, runtime);
+          if (fs2.existsSync(result)) {
             return result;
           }
         }
@@ -17946,7 +17946,7 @@ var require_main4 = __commonJS({
         }
         if (cwd) {
           return new Promise((s) => {
-            fs.lstat(cwd, (err, stats) => {
+            fs2.lstat(cwd, (err, stats) => {
               s(!err && stats.isDirectory() ? cwd : void 0);
             });
           });
@@ -18012,7 +18012,8 @@ __export(extension_exports, {
   deactivate: () => deactivate
 });
 module.exports = __toCommonJS(extension_exports);
-var path = __toESM(require("path"));
+var path2 = __toESM(require("path"));
+var fs = __toESM(require("fs"));
 var import_vscode = require("vscode");
 var import_node = __toESM(require_node3());
 
@@ -18062,6 +18063,69 @@ function normalizeUndefinedVarFallback(value) {
   }
 }
 
+// src/platform.ts
+var os = __toESM(require("os"));
+var path = __toESM(require("path"));
+var PLATFORM_MAPPINGS = {
+  darwin: {
+    x64: {
+      binary: "css-variable-lsp-darwin-x64",
+      asset: "css-variable-lsp-macos-x86_64.tar.gz"
+    },
+    arm64: {
+      binary: "css-variable-lsp-darwin-arm64",
+      asset: "css-variable-lsp-macos-aarch64.tar.gz"
+    }
+  },
+  linux: {
+    x64: {
+      binary: "css-variable-lsp-linux-x64",
+      asset: "css-variable-lsp-linux-x86_64.tar.gz"
+    },
+    arm64: {
+      binary: "css-variable-lsp-linux-arm64",
+      asset: "css-variable-lsp-linux-aarch64.tar.gz"
+    }
+  },
+  win32: {
+    x64: {
+      binary: "css-variable-lsp-win32-x64.exe",
+      asset: "css-variable-lsp-windows-x86_64.exe.zip"
+    },
+    arm64: {
+      binary: "css-variable-lsp-win32-arm64.exe",
+      asset: "css-variable-lsp-windows-aarch64.exe.zip"
+    }
+  }
+};
+function getCurrentPlatformBinary() {
+  const platform2 = os.platform();
+  const arch2 = os.arch();
+  const mapping = PLATFORM_MAPPINGS[platform2]?.[arch2];
+  if (!mapping) {
+    return null;
+  }
+  return {
+    platform: platform2,
+    arch: arch2,
+    binaryName: mapping.binary,
+    assetName: mapping.asset
+  };
+}
+function getBinaryPath(extensionPath, binaryName) {
+  const binary = binaryName || getCurrentPlatformBinary()?.binaryName;
+  if (!binary) {
+    throw new Error(`Unsupported platform: ${os.platform()} ${os.arch()}`);
+  }
+  return path.join(extensionPath, "bin", binary);
+}
+function isPlatformSupported() {
+  return getCurrentPlatformBinary() !== null;
+}
+function getPlatformIdentifier() {
+  return `${os.platform()}-${os.arch()}`;
+}
+
 // src/extension.ts
 var DEFAULT_LOOKUP_FILES = [
   "**/*.less",
@@ -18108,6 +18172,10 @@ var client;
 var restartChain = Promise.resolve();
 var fileWatchers = [];
 var active = false;
+var outputChannel;
+var configChangeTimer;
+var fileEventTimer;
+var pendingFileEvents = [];
 function readCssVariablesConfig() {
   const config = import_vscode.workspace.getConfiguration("cssVariables");
   const lookupFiles = normalizeStringArray(
@@ -18127,6 +18195,11 @@ function readCssVariablesConfig() {
   const undefinedVarFallback = normalizeUndefinedVarFallback(
     config.get("undefinedVarFallback")
   );
+  const serverImplementation = config.get(
+    "serverImplementation",
+    "auto"
+  );
+  const serverBinaryPath = config.get("serverBinaryPath", "");
   return {
     lookupFiles,
     blacklistFolders,
@@ -18134,7 +18207,9 @@ function readCssVariablesConfig() {
     noColorPreview,
     pathDisplay,
     pathDisplayLength,
-    undefinedVarFallback
+    undefinedVarFallback,
+    serverImplementation,
+    serverBinaryPath
   };
 }
 function buildServerArgs(config) {
@@ -18161,14 +18236,35 @@ function buildServerArgs(config) {
   }
   return args;
 }
-function createFileWatchers(lookupFiles) {
+function createFileWatchers(lookupFiles, context) {
   const patterns = lookupFiles.length > 0 ? lookupFiles : DEFAULT_LOOKUP_FILES;
   const uniquePatterns = Array.from(
     new Set(patterns.map((pattern) => pattern.trim()).filter(Boolean))
   );
-  return uniquePatterns.map(
-    (pattern) => import_vscode.workspace.createFileSystemWatcher(pattern)
-  );
+  function scheduleFileEvents() {
+    if (fileEventTimer) {
+      clearTimeout(fileEventTimer);
+    }
+    fileEventTimer = setTimeout(() => {
+      const events = pendingFileEvents.slice();
+      pendingFileEvents = [];
+      outputChannel?.appendLine(
+        `[css-variables] File events: ${events.join(",")}`
+      );
+      void restartClient(context);
+    }, 300);
+  }
+  return uniquePatterns.map((pattern) => {
+    const watcher = import_vscode.workspace.createFileSystemWatcher(pattern);
+    const pushEvent = (type) => () => {
+      pendingFileEvents.push(`${type}:${pattern}`);
+      scheduleFileEvents();
+    };
+    watcher.onDidChange(pushEvent("change"));
+    watcher.onDidCreate(pushEvent("create"));
+    watcher.onDidDelete(pushEvent("delete"));
+    return watcher;
+  });
 }
 function disposeFileWatchers() {
   for (const watcher of fileWatchers) {
@@ -18176,24 +18272,168 @@ function disposeFileWatchers() {
   }
   fileWatchers = [];
 }
+function testBinary(binaryPath) {
+  try {
+    const stats = fs.statSync(binaryPath);
+    if (!stats.isFile()) {
+      outputChannel?.appendLine(
+        `[css-variables] Binary test failed: ${binaryPath} is not a file`
+      );
+      return false;
+    }
+    if (process.platform !== "win32") {
+      const mode = stats.mode;
+      const isExecutable = (mode & 73) !== 0;
+      if (!isExecutable) {
+        outputChannel?.appendLine(
+          `[css-variables] Binary test failed: ${binaryPath} is not executable`
+        );
+        return false;
+      }
+    }
+    outputChannel?.appendLine(
+      `[css-variables] Binary test successful: ${binaryPath} exists and is executable`
+    );
+    return true;
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    outputChannel?.appendLine(
+      `[css-variables] Binary test failed for ${binaryPath}: ${errorMessage}`
+    );
+    return false;
+  }
+}
+function findTypeScriptServer(context) {
+  const bundledServer = context.asAbsolutePath(path2.join("dist", "server.js"));
+  if (fs.existsSync(bundledServer)) {
+    outputChannel?.appendLine(
+      `[css-variables] Using bundled TypeScript server: ${bundledServer}`
+    );
+    return bundledServer;
+  }
+  try {
+    const resolved = require.resolve("css-variable-lsp/out/server.js");
+    if (resolved && fs.existsSync(resolved)) {
+      outputChannel?.appendLine(
+        `[css-variables] Using TypeScript server from npm package: ${resolved}`
+      );
+      return resolved;
+    }
+  } catch (e) {
+  }
+  return null;
+}
+function findRustBinary(context, customPath) {
+  if (customPath) {
+    if (fs.existsSync(customPath)) {
+      outputChannel?.appendLine(
+        `[css-variables] Using custom Rust binary: ${customPath}`
+      );
+      if (testBinary(customPath)) {
+        return customPath;
+      }
+    } else {
+      outputChannel?.appendLine(
+        `[css-variables] Custom binary not found: ${customPath}`
+      );
+    }
+    return null;
+  }
+  if (!isPlatformSupported()) {
+    outputChannel?.appendLine(
+      `[css-variables] Platform not supported for Rust binary: ${getPlatformIdentifier()}`
+    );
+    return null;
+  }
+  try {
+    const binaryPath = getBinaryPath(context.extensionPath);
+    if (fs.existsSync(binaryPath)) {
+      outputChannel?.appendLine(
+        `[css-variables] Found bundled Rust binary: ${binaryPath}`
+      );
+      if (testBinary(binaryPath)) {
+        return binaryPath;
+      }
+    } else {
+      outputChannel?.appendLine(
+        `[css-variables] Bundled Rust binary not found: ${binaryPath}`
+      );
+    }
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    outputChannel?.appendLine(
+      `[css-variables] Error finding Rust binary: ${errorMessage}`
+    );
+  }
+  return null;
+}
+function determineServerOptions(context, config, args) {
+  const { serverImplementation, serverBinaryPath } = config;
+  const tryRustFirst = serverImplementation === "auto" || serverImplementation === "rust";
+  const tryTypescript = serverImplementation === "auto" || serverImplementation === "typescript";
+  if (tryRustFirst) {
+    const rustBinary = findRustBinary(context, serverBinaryPath || void 0);
+    if (rustBinary) {
+      outputChannel?.appendLine("[css-variables] Using Rust LSP server");
+      return {
+        run: { command: rustBinary, transport: import_node.TransportKind.stdio, args },
+        debug: { command: rustBinary, transport: import_node.TransportKind.stdio, args }
+      };
+    }
+    if (serverImplementation === "rust") {
+      outputChannel?.appendLine(
+        "[css-variables] ERROR: Rust server requested but not available"
+      );
+      void import_vscode.window.showErrorMessage(
+        "CSS Variables: Rust LSP server not found. Please check your serverBinaryPath setting or install the Rust binary."
+      );
+      return null;
+    }
+  }
+  if (tryTypescript) {
+    const tsServer = findTypeScriptServer(context);
+    if (tsServer) {
+      outputChannel?.appendLine(
+        "[css-variables] Using TypeScript LSP server (fallback)"
+      );
+      return {
+        run: { module: tsServer, transport: import_node.TransportKind.ipc, args },
+        debug: {
+          module: tsServer,
+          transport: import_node.TransportKind.ipc,
+          args,
+          options: { execArgv: ["--nolazy", "--inspect=6009"] }
+        }
+      };
+    }
+    if (serverImplementation === "typescript") {
+      outputChannel?.appendLine(
+        "[css-variables] ERROR: TypeScript server requested but not available"
+      );
+      void import_vscode.window.showErrorMessage(
+        "CSS Variables: TypeScript LSP server not found. Please reinstall the extension."
+      );
+      return null;
+    }
+  }
+  outputChannel?.appendLine("[css-variables] ERROR: No LSP server available");
+  void import_vscode.window.showErrorMessage(
+    "CSS Variables: No LSP server available. The extension may not work correctly."
+  );
+  return null;
+}
 function createClient(context) {
-  const serverModule = context.asAbsolutePath(path.join("dist", "server.js"));
   const config = readCssVariablesConfig();
   const args = buildServerArgs(config);
   disposeFileWatchers();
-  fileWatchers = createFileWatchers(config.lookupFiles);
+  fileWatchers = createFileWatchers(config.lookupFiles, context);
   for (const w of fileWatchers) {
     context.subscriptions.push(w);
   }
-  const serverOptions = {
-    run: { module: serverModule, transport: import_node.TransportKind.ipc, args },
-    debug: {
-      module: serverModule,
-      transport: import_node.TransportKind.ipc,
-      args,
-      options: { execArgv: ["--nolazy", "--inspect=6009"] }
-    }
-  };
+  const serverOptions = determineServerOptions(context, config, args);
+  if (!serverOptions) {
+    return null;
+  }
   const clientOptions = {
     documentSelector: LANGUAGE_IDS.map((language) => ({
       scheme: "file",
@@ -18221,9 +18461,15 @@ async function restartClient(context) {
       if (client) {
         await client.stop();
       }
-      client = createClient(context);
-      await client.start();
+      const newClient = createClient(context);
+      if (newClient) {
+        client = newClient;
+        void client.start();
+      }
     } catch (error) {
+      outputChannel?.appendLine(
+        "[css-variables] Failed to restart language client: " + String(error)
+      );
       console.error("[css-variables] Failed to restart language client", error);
     }
   });
@@ -18231,14 +18477,31 @@ async function restartClient(context) {
 }
 function activate(context) {
   active = true;
-  client = createClient(context);
-  void client.start().catch(
-    (err) => console.error("[css-variables] Failed to start language client", err)
+  outputChannel = import_vscode.window.createOutputChannel("CSS Variables");
+  context.subscriptions.push(outputChannel);
+  outputChannel?.appendLine(`[css-variables] Activating extension...`);
+  outputChannel?.appendLine(
+    `[css-variables] Platform: ${getPlatformIdentifier()}`
   );
+  const newClient = createClient(context);
+  if (newClient) {
+    client = newClient;
+    void client.start().catch((err) => {
+      outputChannel?.appendLine(
+        "[css-variables] Failed to start language client: " + String(err)
+      );
+      console.error("[css-variables] Failed to start language client", err);
+    });
+  } else {
+    outputChannel?.appendLine(
+      "[css-variables] Failed to create language client"
+    );
+  }
   context.subscriptions.push(
     import_vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration("cssVariables")) {
-        void restartClient(context);
+        if (configChangeTimer) clearTimeout(configChangeTimer);
+        configChangeTimer = setTimeout(() => void restartClient(context), 250);
       }
     })
   );

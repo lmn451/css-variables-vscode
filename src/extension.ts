@@ -1,7 +1,5 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { promisify } from 'util';
-import { exec } from 'child_process';
 import {
   workspace,
   ExtensionContext,
@@ -26,8 +24,6 @@ import {
   isPlatformSupported,
   getPlatformIdentifier,
 } from './platform';
-
-const execAsync = promisify(exec);
 
 const DEFAULT_LOOKUP_FILES = [
   '**/*.less',
@@ -215,14 +211,31 @@ function disposeFileWatchers() {
 /**
  * Test if a binary is executable and working
  */
-async function testBinary(binaryPath: string): Promise<boolean> {
+function testBinary(binaryPath: string): boolean {
   try {
-    // Try to run the binary with --version flag
-    const { stdout } = await execAsync(`"${binaryPath}" --version`, {
-      timeout: 5000,
-    });
+    // Check if file exists and is executable
+    const stats = fs.statSync(binaryPath);
+    if (!stats.isFile()) {
+      outputChannel?.appendLine(
+        `[css-variables] Binary test failed: ${binaryPath} is not a file`,
+      );
+      return false;
+    }
+
+    // On Unix systems, check if file is executable
+    if (process.platform !== 'win32') {
+      const mode = stats.mode;
+      const isExecutable = (mode & 0o111) !== 0; // Check if any execute bit is set
+      if (!isExecutable) {
+        outputChannel?.appendLine(
+          `[css-variables] Binary test failed: ${binaryPath} is not executable`,
+        );
+        return false;
+      }
+    }
+
     outputChannel?.appendLine(
-      `[css-variables] Binary test successful: ${stdout.trim()}`,
+      `[css-variables] Binary test successful: ${binaryPath} exists and is executable`,
     );
     return true;
   } catch (e) {
@@ -267,17 +280,17 @@ function findTypeScriptServer(context: ExtensionContext): string | null {
 /**
  * Find the Rust binary path
  */
-async function findRustBinary(
+function findRustBinary(
   context: ExtensionContext,
   customPath?: string,
-): Promise<string | null> {
+): string | null {
   // If custom path is provided, try that first
   if (customPath) {
     if (fs.existsSync(customPath)) {
       outputChannel?.appendLine(
         `[css-variables] Using custom Rust binary: ${customPath}`,
       );
-      if (await testBinary(customPath)) {
+      if (testBinary(customPath)) {
         return customPath;
       }
     } else {
@@ -303,7 +316,7 @@ async function findRustBinary(
       outputChannel?.appendLine(
         `[css-variables] Found bundled Rust binary: ${binaryPath}`,
       );
-      if (await testBinary(binaryPath)) {
+      if (testBinary(binaryPath)) {
         return binaryPath;
       }
     } else {
@@ -324,11 +337,11 @@ async function findRustBinary(
 /**
  * Determine which server to use based on configuration
  */
-async function determineServerOptions(
+function determineServerOptions(
   context: ExtensionContext,
   config: CssVariablesConfig,
   args: string[],
-): Promise<ServerOptions | null> {
+): ServerOptions | null {
   const { serverImplementation, serverBinaryPath } = config;
 
   // Determine which implementations to try based on setting
@@ -339,10 +352,7 @@ async function determineServerOptions(
 
   // Try Rust first (if enabled)
   if (tryRustFirst) {
-    const rustBinary = await findRustBinary(
-      context,
-      serverBinaryPath || undefined,
-    );
+    const rustBinary = findRustBinary(context, serverBinaryPath || undefined);
     if (rustBinary) {
       outputChannel?.appendLine('[css-variables] Using Rust LSP server');
       return {
@@ -401,9 +411,7 @@ async function determineServerOptions(
   return null;
 }
 
-async function createClient(
-  context: ExtensionContext,
-): Promise<LanguageClient | null> {
+function createClient(context: ExtensionContext): LanguageClient | null {
   const config = readCssVariablesConfig();
   const args = buildServerArgs(config);
 
@@ -416,7 +424,7 @@ async function createClient(
     context.subscriptions.push(w);
   }
 
-  const serverOptions = await determineServerOptions(context, config, args);
+  const serverOptions = determineServerOptions(context, config, args);
   if (!serverOptions) {
     return null;
   }
@@ -454,10 +462,10 @@ async function restartClient(context: ExtensionContext) {
       if (client) {
         await client.stop();
       }
-      const newClient = await createClient(context);
+      const newClient = createClient(context);
       if (newClient) {
         client = newClient;
-        await client.start();
+        void client.start();
       }
     } catch (error) {
       outputChannel?.appendLine(
@@ -469,7 +477,7 @@ async function restartClient(context: ExtensionContext) {
   return restartChain;
 }
 
-export async function activate(context: ExtensionContext) {
+export function activate(context: ExtensionContext) {
   active = true;
 
   outputChannel = window.createOutputChannel('CSS Variables');
@@ -480,7 +488,7 @@ export async function activate(context: ExtensionContext) {
     `[css-variables] Platform: ${getPlatformIdentifier()}`,
   );
 
-  const newClient = await createClient(context);
+  const newClient = createClient(context);
   if (newClient) {
     client = newClient;
     void client.start().catch((err) => {
