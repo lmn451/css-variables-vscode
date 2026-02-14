@@ -18174,8 +18174,6 @@ var fileWatchers = [];
 var active = false;
 var outputChannel;
 var configChangeTimer;
-var fileEventTimer;
-var pendingFileEvents = [];
 function readCssVariablesConfig() {
   const config = import_vscode.workspace.getConfiguration("cssVariables");
   const lookupFiles = normalizeStringArray(
@@ -18236,33 +18234,13 @@ function buildServerArgs(config) {
   }
   return args;
 }
-function createFileWatchers(lookupFiles, context) {
+function createFileWatchers(lookupFiles) {
   const patterns = lookupFiles.length > 0 ? lookupFiles : DEFAULT_LOOKUP_FILES;
   const uniquePatterns = Array.from(
     new Set(patterns.map((pattern) => pattern.trim()).filter(Boolean))
   );
-  function scheduleFileEvents() {
-    if (fileEventTimer) {
-      clearTimeout(fileEventTimer);
-    }
-    fileEventTimer = setTimeout(() => {
-      const events = pendingFileEvents.slice();
-      pendingFileEvents = [];
-      outputChannel?.appendLine(
-        `[css-variables] File events: ${events.join(",")}`
-      );
-      void restartClient(context);
-    }, 300);
-  }
   return uniquePatterns.map((pattern) => {
     const watcher = import_vscode.workspace.createFileSystemWatcher(pattern);
-    const pushEvent = (type) => () => {
-      pendingFileEvents.push(`${type}:${pattern}`);
-      scheduleFileEvents();
-    };
-    watcher.onDidChange(pushEvent("change"));
-    watcher.onDidCreate(pushEvent("create"));
-    watcher.onDidDelete(pushEvent("delete"));
     return watcher;
   });
 }
@@ -18426,7 +18404,7 @@ function createClient(context) {
   const config = readCssVariablesConfig();
   const args = buildServerArgs(config);
   disposeFileWatchers();
-  fileWatchers = createFileWatchers(config.lookupFiles, context);
+  fileWatchers = createFileWatchers(config.lookupFiles);
   for (const w of fileWatchers) {
     context.subscriptions.push(w);
   }

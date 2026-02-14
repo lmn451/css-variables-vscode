@@ -91,8 +91,6 @@ let fileWatchers: FileSystemWatcher[] = [];
 let active = false;
 let outputChannel: OutputChannel | undefined;
 let configChangeTimer: NodeJS.Timeout | undefined;
-let fileEventTimer: NodeJS.Timeout | undefined;
-let pendingFileEvents: Array<string> = [];
 
 function readCssVariablesConfig(): CssVariablesConfig {
   const config = workspace.getConfiguration('cssVariables');
@@ -166,37 +164,14 @@ function buildServerArgs(config: CssVariablesConfig): string[] {
 
 function createFileWatchers(
   lookupFiles: string[],
-  context: ExtensionContext,
 ): FileSystemWatcher[] {
   const patterns = lookupFiles.length > 0 ? lookupFiles : DEFAULT_LOOKUP_FILES;
   const uniquePatterns = Array.from(
     new Set(patterns.map((pattern) => pattern.trim()).filter(Boolean)),
   );
 
-  function scheduleFileEvents() {
-    if (fileEventTimer) {
-      clearTimeout(fileEventTimer);
-    }
-    fileEventTimer = setTimeout(() => {
-      const events = pendingFileEvents.slice();
-      pendingFileEvents = [];
-      outputChannel?.appendLine(
-        `[css-variables] File events: ${events.join(',')}`,
-      );
-      // Debounced restart to avoid thrashing on many fs events
-      void restartClient(context);
-    }, 300);
-  }
-
   return uniquePatterns.map((pattern) => {
     const watcher = workspace.createFileSystemWatcher(pattern);
-    const pushEvent = (type: string) => () => {
-      pendingFileEvents.push(`${type}:${pattern}`);
-      scheduleFileEvents();
-    };
-    watcher.onDidChange(pushEvent('change'));
-    watcher.onDidCreate(pushEvent('create'));
-    watcher.onDidDelete(pushEvent('delete'));
     return watcher;
   });
 }
@@ -416,7 +391,7 @@ function createClient(context: ExtensionContext): LanguageClient | null {
   const args = buildServerArgs(config);
 
   disposeFileWatchers();
-  fileWatchers = createFileWatchers(config.lookupFiles, context);
+  fileWatchers = createFileWatchers(config.lookupFiles);
 
   // register watchers so they are disposed automatically when the extension
   // context is disposed. We still keep `fileWatchers` for manual control.
