@@ -1,0 +1,6 @@
+:root {
+  --primary-color: #ff5733;
+  --spacing-sm: 8px;
+  --font-family: 'Inter', sans-serif;
+  --undefined-test: var(--does-not-exist);
+}

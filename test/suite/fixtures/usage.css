@@ -1,0 +1,5 @@
+.card {
+  color: var(--primary-color);
+  padding: var(--spacing-sm);
+  font-family: var(--font-family);
+}

@@ -1,16 +1,15 @@
 const path = require('path');
+const fs = require('fs');
 const { runTests, downloadAndUnzipVSCode } = require('@vscode/test-electron');
 
 async function main() {
   try {
-    const vscodeExecutablePath = await downloadAndUnzipVSCode();
-
     const extensionDevelopmentPath = path.resolve(__dirname, '..');
-    // Point to the suite directory; the harness will resolve the entry module.
-    const extensionTestsPath = path.resolve(__dirname, 'suite');
+    // Point to the suite entry file
+    const extensionTestsPath = path.resolve(__dirname, 'suite', 'index');
 
     await runTests({
-      vscodeExecutablePath,
+      version: '1.85.0',
       extensionDevelopmentPath,
       extensionTestsPath,
     });
