@@ -27,6 +27,8 @@ jobs:
 
       - name: Download Rust LSP binaries
         run: node scripts/download-binaries.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint
         run: npm run lint
@@ -58,9 +60,11 @@ jobs:
 
       - name: Download Rust LSP binaries
         run: node scripts/download-binaries.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build extension
         run: npm run compile
 
       - name: Run integration tests
-        run: npm run test:integration
+        run: xvfb-run -a npm run test:integration
