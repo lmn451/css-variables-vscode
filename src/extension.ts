@@ -19,6 +19,7 @@ import {
   normalizePathDisplay,
   normalizePathDisplayLength,
   normalizeUndefinedVarFallback,
+  sanitizeRustServerEnv,
 } from './helpers';
 import {
   getBinaryPath,
@@ -330,10 +331,21 @@ function determineServerOptions(
   if (tryRustFirst) {
     const rustBinary = findRustBinary(context, serverBinaryPath || undefined);
     if (rustBinary) {
+      const rustServerEnv = sanitizeRustServerEnv();
       outputChannel?.appendLine('[css-variables] Using Rust LSP server');
       return {
-        run: { command: rustBinary, transport: TransportKind.stdio, args },
-        debug: { command: rustBinary, transport: TransportKind.stdio, args },
+        run: {
+          command: rustBinary,
+          transport: TransportKind.stdio,
+          args,
+          options: { env: rustServerEnv },
+        },
+        debug: {
+          command: rustBinary,
+          transport: TransportKind.stdio,
+          args,
+          options: { env: rustServerEnv },
+        },
       };
     }
 

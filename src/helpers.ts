@@ -64,6 +64,15 @@ export function normalizeUndefinedVarFallback(
   }
 }
 
+export function sanitizeRustServerEnv(
+  baseEnv: NodeJS.ProcessEnv | undefined = process.env
+): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...(baseEnv ?? {}) };
+  delete env.RUST_LOG;
+  delete env.RUST_LOG_STYLE;
+  return env;
+}
+
 export type CssVariablesConfig = {
   lookupFiles: string[];
   blacklistFolders: string[];
@@ -105,4 +114,3 @@ export function buildServerArgs(config: CssVariablesConfig): string[] {
 
   return args;
 }
-
