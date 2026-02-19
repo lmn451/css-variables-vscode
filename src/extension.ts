@@ -12,6 +12,7 @@ import {
   LanguageClientOptions,
   ServerOptions,
   TransportKind,
+  State,
 } from 'vscode-languageclient/node';
 import {
   normalizeStringArray,
@@ -498,5 +499,17 @@ export function deactivate(): Thenable<void> | undefined {
   if (!client) {
     return undefined;
   }
-  return client.stop();
+  if (client.state === State.Starting) {
+    return undefined;
+  }
+
+  try {
+    return client.stop();
+  } catch (error) {
+    outputChannel?.appendLine(
+      '[css-variables] Ignoring error while stopping language client: ' +
+        String(error),
+    );
+    return undefined;
+  }
 }
