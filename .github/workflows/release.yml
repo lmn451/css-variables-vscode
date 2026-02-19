@@ -28,6 +28,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify VSCE token
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        run: |
+          if [ -z "${VSCE_PAT}" ]; then
+            echo "::error::VSCE_PAT is missing or empty."
+            exit 1
+          fi
+          npx vsce verify-pat miclmn451 -p "${VSCE_PAT}"
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
       - name: Download Rust LSP binaries
         run: node scripts/download-binaries.js
         env:
@@ -183,7 +194,7 @@ jobs:
 
       - name: Publish to VS Code Marketplace
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        run: npx vsce publish --target ${{ matrix.target }} --packagePath css-variables-vscode-${{ matrix.target }}.vsix
+        run: npx vsce publish --packagePath css-variables-vscode-${{ matrix.target }}.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
