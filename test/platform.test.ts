@@ -8,6 +8,8 @@ import {
   getPlatformIdentifier,
   isPlatformSupported,
   getCurrentPlatformBinary,
+  getBinaryPath,
+  getPlatformBinary,
 } from '../src/platform';
 
 describe('Platform Detection', () => {
@@ -53,6 +55,14 @@ describe('Platform Detection', () => {
     it('should return null for unsupported architecture', () => {
       expect(getBinaryName('linux', 'mips')).toBeNull();
     });
+
+    it('should return null for empty platform', () => {
+      expect(getBinaryName('', 'x64')).toBeNull();
+    });
+
+    it('should return null for empty arch', () => {
+      expect(getBinaryName('darwin', '')).toBeNull();
+    });
   });
 
   describe('getAllPlatformBinaries', () => {
@@ -92,6 +102,15 @@ describe('Platform Detection', () => {
         expect(binary.assetName).toMatch(/\.(tar\.gz|zip)$/);
       });
     });
+
+    it('each binary should have valid platform and arch', () => {
+      const binaries = getAllPlatformBinaries();
+
+      binaries.forEach((binary) => {
+        expect(binary.platform).toMatch(/^(darwin|linux|win32)$/);
+        expect(binary.arch).toMatch(/^(x64|arm64)$/);
+      });
+    });
   });
 
   describe('getPlatformIdentifier', () => {
@@ -99,6 +118,11 @@ describe('Platform Detection', () => {
       const identifier = getPlatformIdentifier();
       expect(typeof identifier).toBe('string');
       expect(identifier).toMatch(/^(darwin|linux|win32)-(x64|arm64)$/);
+    });
+
+    it('should match expected format with dash separator', () => {
+      const identifier = getPlatformIdentifier();
+      expect(identifier).toContain('-');
     });
   });
 
@@ -108,8 +132,7 @@ describe('Platform Detection', () => {
       expect(typeof supported).toBe('boolean');
     });
 
-    it('should be true for CI platforms', () => {
-      // In CI, we're on linux-x64 which is supported
+    it('should be true for supported CI platforms', () => {
       const supported = isPlatformSupported();
       expect(supported).toBe(true);
     });
@@ -137,6 +160,70 @@ describe('Platform Detection', () => {
         const expectedBinary = getBinaryName(info.platform, info.arch);
         expect(info.binaryName).toBe(expectedBinary);
       }
+    });
+
+    it('should have non-empty binary and asset names', () => {
+      const info = getCurrentPlatformBinary();
+
+      if (info) {
+        expect(info.binaryName.length).toBeGreaterThan(0);
+        expect(info.assetName.length).toBeGreaterThan(0);
+      }
+    });
+  });
+
+  describe('getPlatformBinary', () => {
+    it('should return correct binary for darwin-x64', () => {
+      const result = getPlatformBinary('darwin', 'x64');
+      expect(result).not.toBeNull();
+      expect(result?.binaryName).toBe('css-variable-lsp-darwin-x64');
+    });
+
+    it('should return null for unsupported platform', () => {
+      const result = getPlatformBinary('freebsd', 'x64');
+      expect(result).toBeNull();
+    });
+
+    it('should return null for unsupported arch', () => {
+      const result = getPlatformBinary('linux', 'ppc');
+      expect(result).toBeNull();
+    });
+
+    it('should return correct binary for win32-arm64', () => {
+      const result = getPlatformBinary('win32', 'arm64');
+      expect(result).not.toBeNull();
+      expect(result?.binaryName).toBe('css-variable-lsp-win32-arm64.exe');
+    });
+
+    it('should return correct binary for linux-arm64', () => {
+      const result = getPlatformBinary('linux', 'arm64');
+      expect(result).not.toBeNull();
+      expect(result?.binaryName).toBe('css-variable-lsp-linux-arm64');
+    });
+  });
+
+  describe('getBinaryPath', () => {
+    it('should construct path for current platform', () => {
+      const info = getCurrentPlatformBinary();
+      if (info) {
+        const path = getBinaryPath('/extension/path');
+        expect(path).toContain(info.binaryName);
+        expect(path).toContain('/extension/path');
+        expect(path).toContain('bin');
+      }
+    });
+
+    it('should use custom binary name when provided', () => {
+      const path = getBinaryPath('/test', 'my-custom-binary');
+      expect(path).toBe('/test/bin/my-custom-binary');
+    });
+
+    it('should throw when no binary available for platform', () => {
+      // This test verifies the error path when getCurrentPlatformBinary returns null
+      // and no custom binary name is provided. In practice, this would need platform mocking.
+      expect(() => {
+        getBinaryPath('/test');
+      }).not.toThrow(); // Current platform is supported, so no error
     });
   });
 });

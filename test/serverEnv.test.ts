@@ -1,4 +1,4 @@
-import { sanitizeRustServerEnv } from '../src/helpers';
+import { sanitizeRustServerEnv } from '../src/utils';
 
 describe('sanitizeRustServerEnv', () => {
   test('removes rust logging variables', () => {

@@ -1,0 +1,13 @@
+// SCSS variable definitions
+$primary-color: #3498db;
+$spacing-base: 16px;
+$font-stack: 'Helvetica Neue', sans-serif;
+$border-radius: 4px;
+
+// These are SCSS vars, not CSS vars, so they won't be indexed by the LSP
+// But we can test mixed files with both
+
+:root {
+  --scss-primary: #3498db;
+  --scss-spacing: 16px;
+}

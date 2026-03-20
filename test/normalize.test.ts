@@ -3,9 +3,9 @@ import {
   normalizePathDisplay,
   normalizePathDisplayLength,
   normalizeUndefinedVarFallback,
-} from "../src/helpers";
+} from "../src/utils";
 
-describe("helpers: normalizeStringArray", () => {
+describe("utils: normalizeStringArray", () => {
   const fallback = ["**/*.css", "**/*.scss"];
 
   test("returns fallback for undefined", () => {
@@ -26,7 +26,7 @@ describe("helpers: normalizeStringArray", () => {
   });
 });
 
-describe("helpers: normalizePathDisplay", () => {
+describe("utils: normalizePathDisplay", () => {
   test("accepts valid values (case-insensitive)", () => {
     expect(normalizePathDisplay("relative")).toBe("relative");
     expect(normalizePathDisplay("RELATIVE")).toBe("relative");
@@ -41,7 +41,7 @@ describe("helpers: normalizePathDisplay", () => {
   });
 });
 
-describe("helpers: normalizePathDisplayLength", () => {
+describe("utils: normalizePathDisplayLength", () => {
   test("accepts finite non-negative numbers and floors", () => {
     expect(normalizePathDisplayLength(5)).toBe(5);
     expect(normalizePathDisplayLength(5.9)).toBe(5);
@@ -58,7 +58,7 @@ describe("helpers: normalizePathDisplayLength", () => {
   });
 });
 
-describe("helpers: normalizeUndefinedVarFallback", () => {
+describe("utils: normalizeUndefinedVarFallback", () => {
   test("maps synonyms to canonical values", () => {
     expect(normalizeUndefinedVarFallback("warning")).toBe("warning");
     expect(normalizeUndefinedVarFallback("warn")).toBe("warning");

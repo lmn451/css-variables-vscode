@@ -123,3 +123,23 @@ export function isPlatformSupported(): boolean {
 export function getPlatformIdentifier(): string {
   return `${os.platform()}-${os.arch()}`;
 }
+
+/**
+ * Get the platform binary info for a specific platform/arch combination
+ */
+export function getPlatformBinary(
+  platform: string,
+  arch: string,
+): PlatformBinary | null {
+  const mapping = PLATFORM_MAPPINGS[platform]?.[arch];
+  if (!mapping) {
+    return null;
+  }
+
+  return {
+    platform,
+    arch,
+    binaryName: mapping.binary,
+    assetName: mapping.asset,
+  };
+}

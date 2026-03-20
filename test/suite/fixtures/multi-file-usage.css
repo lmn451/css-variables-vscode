@@ -1,0 +1,12 @@
+/* This file tests cross-file variable resolution */
+/* Variables are defined in definitions.css, SCSS, LESS, Vue, Svelte */
+
+.card {
+  /* From definitions.css */
+  color: var(--primary-color);
+  padding: var(--spacing-sm);
+  font-family: var(--font-family);
+  /* These would be found if the lookup globs include the other fixtures */
+  /* --vue-primary: var(--vue-primary); */
+  /* --scss-primary: var(--scss-primary); */
+}

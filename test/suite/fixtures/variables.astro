@@ -1,0 +1,26 @@
+---
+const title = "Astro Page";
+---
+
+<html lang="en">
+<head>
+  <title>{title}</title>
+</head>
+<body>
+  <h1>{title}</h1>
+</body>
+</html>
+
+<style>
+:root {
+  --astro-primary: #34495e;
+  --astro-spacing: 18px;
+  --astro-font: 'Verdana', sans-serif;
+}
+
+h1 {
+  color: var(--astro-primary);
+  padding: var(--astro-spacing);
+  font-family: var(--astro-font);
+}
+</style>
