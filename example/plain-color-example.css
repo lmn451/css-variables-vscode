@@ -1,0 +1,41 @@
+/* Example: Plain Color to CSS Variable Suggestions
+ * 
+ * This feature automatically suggests CSS variables when you use
+ * plain colors that match existing variable values.
+ * 
+ * Try typing these colors and see the suggestions appear:
+ * - #ff5733 (matches --brand-color)
+ * - #3498db (matches --primary)
+ * - #2ecc71 (matches --success)
+ * - #e74c3c (matches --danger)
+ */
+
+:root {
+  /* Define your color variables here */
+  --brand-color: #ff5733;
+  --primary: #3498db;
+  --success: #2ecc71;
+  --danger: #e74c3c;
+  --warning: #f1c40f;
+  --info: #9b59b6;
+}
+
+/* Example usage - type any of these colors and
+ * you should see the corresponding variable suggested */
+
+.button-primary {
+  background-color: #3498db;  /* Try typing "#3498db" and see --primary suggested */
+}
+
+.alert-success {
+  color: #2ecc71;            /* Try typing "#2ecc71" and see --success suggested */
+}
+
+.alert-error {
+  border-color: #e74c3c;     /* Try typing "#e74c3c" and see --danger suggested */
+}
+
+/* Named colors also work:
+.button-text {
+  color: red;                /* May suggest --danger if they match */
+} */

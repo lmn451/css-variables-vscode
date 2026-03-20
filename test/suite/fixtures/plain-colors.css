@@ -1,0 +1,49 @@
+/* Test file for plain color to CSS variable suggestions */
+
+/* Variables are defined here */
+:root {
+  --brand-color: #ff5733;
+  --brand-primary: #3498db;
+  --success-green: #2ecc71;
+  --warning-yellow: #f1c40f;
+  --danger-red: #e74c3c;
+  --info-purple: #9b59b6;
+  --neutral-gray: #95a5a6;
+}
+
+/* These should suggest using CSS variables */
+.selector-1 {
+  /* Line 17: color: #ff5733; - should suggest --brand-color */
+  color: #ff5733;
+}
+
+.selector-2 {
+  /* Line 22: background-color: #3498db; - should suggest --brand-primary */
+  background-color: #3498db;
+}
+
+.selector-3 {
+  /* Line 27: border-color: #2ecc71; - should suggest --success-green */
+  border-color: #2ecc71;
+}
+
+.selector-4 {
+  /* Line 32: color: #f1c40f; - should suggest --warning-yellow */
+  color: #f1c40f;
+}
+
+.selector-5 {
+  /* Line 37: background: #e74c3c; - should suggest --danger-red */
+  background: #e74c3c;
+}
+
+/* Named colors - these should also suggest variables if they match */
+.selector-6 {
+  /* Line 43: color: red; - should suggest --danger-red (if #e74c3c ≈ red) */
+  color: red;
+}
+
+.selector-7 {
+  /* Line 48: background-color: blue; - should not suggest (no matching var) */
+  background-color: blue;
+}

@@ -156,7 +156,7 @@
   },
   "dependencies": {
     "@vscode/test-electron": "^2.5.2",
-    "css-variable-lsp": "^1.0.16",
+    "css-variable-lsp": "1.0.20-beta.1",
     "glob": "^13.0.1",
     "mocha": "^11.7.5",
     "vscode-languageclient": "^9.0.1"
