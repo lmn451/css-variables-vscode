@@ -13,7 +13,6 @@ esbuild.js
 .vscode-test/**
 
 # Development files
-.beads/**
 .gitignore
 .gitattributes
 
