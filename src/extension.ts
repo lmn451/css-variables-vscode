@@ -22,6 +22,7 @@ import {
 
 let client: LanguageClient | undefined;
 let restartChain = Promise.resolve();
+let clientStart = Promise.resolve();
 let fileWatchers: FileSystemWatcher[] = [];
 let active = false;
 let outputChannel: OutputChannel | undefined;
@@ -71,27 +72,45 @@ function createClient(context: ExtensionContext): LanguageClient | null {
   return lc;
 }
 
-async function restartClient(context: ExtensionContext) {
-  if (!active) {
-    return restartChain;
-  }
+function startClient(newClient: LanguageClient): void {
+  clientStart = newClient.start().catch((error: unknown) => {
+    outputChannel?.appendLine(
+      '[css-variables] Failed to start language client: ' + String(error),
+    );
+    console.error('[css-variables] Failed to start language client', error);
+  });
+}
 
+async function stopClient(): Promise<void> {
+  await clientStart;
+  const stoppingClient = client;
+  if (stoppingClient && stoppingClient.state !== State.Stopped) {
+    await stoppingClient.stop();
+  }
+  client = undefined;
+}
+
+function restartClient(context: ExtensionContext): Promise<void> {
   restartChain = restartChain.then(async () => {
-    try {
-      if (client) {
-        await client.stop();
-      }
-      const newClient = createClient(context);
-      if (newClient) {
-        client = newClient;
-        void client.start();
-      }
-    } catch (error) {
-      outputChannel?.appendLine(
-        '[css-variables] Failed to restart language client: ' + String(error),
-      );
-      console.error('[css-variables] Failed to restart language client', error);
+    if (!active) {
+      return;
     }
+    await stopClient();
+    // Deactivation can happen while startup or shutdown is still in flight.
+    if (!active) {
+      return;
+    }
+    const newClient = createClient(context);
+    if (newClient) {
+      client = newClient;
+      startClient(newClient);
+      await clientStart;
+    }
+  }).catch((error: unknown) => {
+    outputChannel?.appendLine(
+      '[css-variables] Failed to restart language client: ' + String(error),
+    );
+    console.error('[css-variables] Failed to restart language client', error);
   });
   return restartChain;
 }
@@ -110,12 +129,7 @@ export function activate(context: ExtensionContext) {
   const newClient = createClient(context);
   if (newClient) {
     client = newClient;
-    void client.start().catch((err) => {
-      outputChannel?.appendLine(
-        '[css-variables] Failed to start language client: ' + String(err),
-      );
-      console.error('[css-variables] Failed to start language client', err);
-    });
+    startClient(newClient);
   } else {
     outputChannel?.appendLine(
       '[css-variables] Failed to create language client',
@@ -124,7 +138,7 @@ export function activate(context: ExtensionContext) {
 
   context.subscriptions.push(
     workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration('cssVariables')) {
+      if (active && event.affectsConfiguration('cssVariables')) {
         if (configChangeTimer) clearTimeout(configChangeTimer);
         configChangeTimer = setTimeout(() => void restartClient(context), 250);
       }
@@ -132,26 +146,16 @@ export function activate(context: ExtensionContext) {
   );
 }
 
-export function deactivate(): Thenable<void> | undefined {
+export function deactivate(): Promise<void> {
   active = false;
-  restartChain = Promise.resolve();
-
-  disposeFileWatchers();
-
-  if (!client) {
-    return undefined;
-  }
-  if (client.state === State.Starting) {
-    return undefined;
+  if (configChangeTimer) {
+    clearTimeout(configChangeTimer);
+    configChangeTimer = undefined;
   }
 
-  try {
-    return client.stop();
-  } catch (error) {
+  return restartChain.then(stopClient).catch((error: unknown) => {
     outputChannel?.appendLine(
-      '[css-variables] Ignoring error while stopping language client: ' +
-        String(error),
+      '[css-variables] Ignoring error while stopping language client: ' + String(error),
     );
-    return undefined;
-  }
+  }).finally(disposeFileWatchers);
 }
