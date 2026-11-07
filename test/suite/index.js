@@ -1,14 +1,18 @@
 const path = require('path');
-const Mocha = require('mocha');
-const glob = require('glob');
+const { globSync } = require('glob');
 
-function run() {
+async function run() {
+  const { default: Mocha } = await import('mocha');
+  const vscode = require('vscode');
+  await vscode.workspace
+    .getConfiguration('cssVariables')
+    .update('serverImplementation', 'auto', vscode.ConfigurationTarget.Global);
   const mocha = new Mocha({ ui: 'bdd', color: true, timeout: 60000 });
   const testsRoot = path.resolve(__dirname);
 
   return new Promise((resolve, reject) => {
     try {
-      const files = glob.sync('**/*.test.js', { cwd: testsRoot });
+      const files = globSync('**/*.test.js', { cwd: testsRoot });
       files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)));
 
       mocha.run((failures) => {
