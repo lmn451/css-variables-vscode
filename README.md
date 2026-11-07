@@ -2,6 +2,9 @@
 
 Project-wide CSS custom properties (variables) support for VS Code, powered by `css-variable-lsp`.
 
+Requires VS Code 1.91 or later. The bundled TypeScript server runs in VS Code's
+Node.js extension host; no separate Node.js installation is needed to use the extension.
+
 ## Features
 
 - Workspace indexing of CSS variables across `.css`, `.scss`, `.sass`, `.less`, and HTML `<style>` blocks / inline styles.
@@ -190,7 +193,7 @@ Assume a variable is defined in `/Users/you/project/src/styles/theme.css` and yo
 
 ### Prerequisites
 
-- Node.js (v16+ recommended)
+- Node.js 24 LTS or later and npm 11 (see `.nvmrc`)
 - npm
 - (Optional) Rust toolchain if building the LSP from source
 

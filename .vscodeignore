@@ -1,7 +1,8 @@
 # Source files
 src/**
 tsconfig.json
-.eslintrc.json
+eslint.config.cjs
+tsconfig.test.json
 .prettierrc
 
 # Build files
@@ -11,10 +12,13 @@ esbuild.js
 # IDE files
 .vscode/**
 .vscode-test/**
+.t/**
 
 # Development files
 .gitignore
 .gitattributes
+.nvmrc
+.context/**
 
 # Test files
 test/**
@@ -42,6 +46,7 @@ bin/**/*.zip
 # Documentation (keep README.md)
 CONTRIBUTING.md
 walkthrough.md
+docs/**
 example/**
 
 # CI/CD
