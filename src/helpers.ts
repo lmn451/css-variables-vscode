@@ -30,10 +30,7 @@ import {
   type PathDisplayMode,
   type UndefinedVarFallbackMode,
 } from './utils';
-import {
-  getBinaryPath,
-  isPlatformSupported,
-} from './platform';
+import { getBinaryPath, isPlatformSupported } from './platform';
 
 export type { PathDisplayMode, UndefinedVarFallbackMode };
 export {
@@ -57,6 +54,7 @@ type CssVariablesConfig = {
   pathDisplay?: PathDisplayMode;
   pathDisplayLength?: number;
   undefinedVarFallback?: UndefinedVarFallbackMode;
+  diagnosticSeverities?: Record<string, string>;
   serverImplementation: ServerImplementation;
   serverBinaryPath: string;
 };
@@ -94,6 +92,9 @@ export function readCssVariablesConfig(): CssVariablesConfig {
     pathDisplay,
     pathDisplayLength,
     undefinedVarFallback,
+    diagnosticSeverities: config.get<Record<string, string>>(
+      'diagnosticSeverities',
+    ),
     serverImplementation,
     serverBinaryPath,
   };
@@ -118,7 +119,10 @@ export function disposeFileWatchers(): void {
   // Implementation moved to extension.ts
 }
 
-function testBinary(binaryPath: string, outputChannel?: OutputChannel): boolean {
+function testBinary(
+  binaryPath: string,
+  outputChannel?: OutputChannel,
+): boolean {
   try {
     const stats = fs.statSync(binaryPath);
     if (!stats.isFile()) {
@@ -242,7 +246,11 @@ export function determineServerOptions(
     serverImplementation === 'auto' || serverImplementation === 'typescript';
 
   if (tryRustFirst) {
-    const rustBinary = findRustBinary(context, serverBinaryPath || undefined, outputChannel);
+    const rustBinary = findRustBinary(
+      context,
+      serverBinaryPath || undefined,
+      outputChannel,
+    );
     if (rustBinary) {
       const rustServerEnv = sanitizeRustServerEnv();
       outputChannel?.appendLine('[css-variables] Using Rust LSP server');
@@ -312,7 +320,12 @@ export function createClient(
     context.subscriptions.push(w);
   }
 
-  const serverOptions = determineServerOptions(context, config, args, outputChannel);
+  const serverOptions = determineServerOptions(
+    context,
+    config,
+    args,
+    outputChannel,
+  );
   if (!serverOptions) {
     return null;
   }

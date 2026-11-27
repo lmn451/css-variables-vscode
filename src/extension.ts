@@ -5,10 +5,7 @@ import {
   window,
   OutputChannel,
 } from 'vscode';
-import {
-  LanguageClient,
-  State,
-} from 'vscode-languageclient/node';
+import { LanguageClient, State } from 'vscode-languageclient/node';
 import {
   readCssVariablesConfig,
   buildServerArgs,
@@ -16,9 +13,7 @@ import {
   determineServerOptions,
   LANGUAGE_IDS,
 } from './helpers';
-import {
-  getPlatformIdentifier,
-} from './platform';
+import { getPlatformIdentifier } from './platform';
 
 let client: LanguageClient | undefined;
 let restartChain = Promise.resolve();
@@ -46,7 +41,12 @@ function createClient(context: ExtensionContext): LanguageClient | null {
     context.subscriptions.push(w);
   }
 
-  const serverOptions = determineServerOptions(context, config, args, outputChannel);
+  const serverOptions = determineServerOptions(
+    context,
+    config,
+    args,
+    outputChannel,
+  );
   if (!serverOptions) {
     return null;
   }
@@ -58,6 +58,11 @@ function createClient(context: ExtensionContext): LanguageClient | null {
     })),
     synchronize: {
       fileEvents: fileWatchers,
+    },
+    initializationOptions: {
+      cssVariables: {
+        diagnosticSeverities: config.diagnosticSeverities,
+      },
     },
   };
 
@@ -91,27 +96,29 @@ async function stopClient(): Promise<void> {
 }
 
 function restartClient(context: ExtensionContext): Promise<void> {
-  restartChain = restartChain.then(async () => {
-    if (!active) {
-      return;
-    }
-    await stopClient();
-    // Deactivation can happen while startup or shutdown is still in flight.
-    if (!active) {
-      return;
-    }
-    const newClient = createClient(context);
-    if (newClient) {
-      client = newClient;
-      startClient(newClient);
-      await clientStart;
-    }
-  }).catch((error: unknown) => {
-    outputChannel?.appendLine(
-      '[css-variables] Failed to restart language client: ' + String(error),
-    );
-    console.error('[css-variables] Failed to restart language client', error);
-  });
+  restartChain = restartChain
+    .then(async () => {
+      if (!active) {
+        return;
+      }
+      await stopClient();
+      // Deactivation can happen while startup or shutdown is still in flight.
+      if (!active) {
+        return;
+      }
+      const newClient = createClient(context);
+      if (newClient) {
+        client = newClient;
+        startClient(newClient);
+        await clientStart;
+      }
+    })
+    .catch((error: unknown) => {
+      outputChannel?.appendLine(
+        '[css-variables] Failed to restart language client: ' + String(error),
+      );
+      console.error('[css-variables] Failed to restart language client', error);
+    });
   return restartChain;
 }
 
@@ -153,9 +160,13 @@ export function deactivate(): Promise<void> {
     configChangeTimer = undefined;
   }
 
-  return restartChain.then(stopClient).catch((error: unknown) => {
-    outputChannel?.appendLine(
-      '[css-variables] Ignoring error while stopping language client: ' + String(error),
-    );
-  }).finally(disposeFileWatchers);
+  return restartChain
+    .then(stopClient)
+    .catch((error: unknown) => {
+      outputChannel?.appendLine(
+        '[css-variables] Ignoring error while stopping language client: ' +
+          String(error),
+      );
+    })
+    .finally(disposeFileWatchers);
 }
