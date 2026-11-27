@@ -57,6 +57,15 @@
       "type": "object",
       "title": "CSS Variables (LSP)",
       "properties": {
+        "cssVariables.diagnosticSeverities": {
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["error", "warning", "info", "hint", "off"]
+          },
+          "description": "Diagnostic severity overrides keyed by full diagnostic code. Invalid or omitted values keep the server default."
+        },
         "cssVariables.lookupFiles": {
           "type": "array",
           "default": [

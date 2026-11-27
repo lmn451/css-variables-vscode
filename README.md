@@ -46,8 +46,7 @@ The extension automatically selects the best available server based on your plat
 
 ## Configuration
 
-You can override the lookup globs and folder blacklist via VS Code settings. Open
-Settings JSON (Cmd+, then "Open Settings JSON") and add:
+You can override diagnostic severities by full diagnostic code (`error`, `warning`, `info`, `hint`, or `off`), lookup globs, and folder blacklist via VS Code settings. Invalid severity values are ignored. For example:
 
 ```json
 {
